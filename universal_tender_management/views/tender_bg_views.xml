@@ -1,0 +1,71 @@
+<odoo>
+
+    <record id="action_tender_bg" model="ir.actions.act_window">
+        <field name="name">Bank Guarantees</field>
+        <field name="res_model">tender.bg</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_tender_emd" model="ir.actions.act_window">
+        <field name="name">EMD</field>
+        <field name="res_model">emd.master</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <record id="view_tender_bg_tree" model="ir.ui.view">
+        <field name="name">tender.bg.tree</field>
+        <field name="model">tender.bg</field>
+        <field name="arch" type="xml">
+            <tree create="0" duplicate="0" edit="0" delete="0">
+                <field name="tender_id"/>
+                <field name="purpose"/>
+                <field name="bank_name"/>
+                <field name="amount"/>
+                <field name="expiry_date"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_tender_emd_tree" model="ir.ui.view">
+        <field name="name">view_tender_emd_tree</field>
+        <field name="model">emd.master</field>
+        <field name="arch" type="xml">
+            <tree create="0" duplicate="0" edit="0" delete="0">
+                <field name="tender_emd_id"/>
+                <field name="emd_purpose" string="Purpose"/>
+                <field name="emd_required"/>
+                <field name="emd_amount" string="Amount"/>
+                <field name="emd_type" string="Type"/>
+                <field name="emd_attachment" widget="many2many_tags" string="Attachment"/>
+                <field name="bank_name" string="Bank"/>
+                <field name="submitted_date" string="Submitted Date"/>
+                <field name="expiry_date" string="Expiry Date"/>
+                <field name="emd_status" string="Status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_tender_bg_form" model="ir.ui.view">
+        <field name="name">tender.bg.form</field>
+        <field name="model">tender.bg</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="tender_id"/>
+                        <field name="purpose"/>
+                        <field name="bank_name"/>
+                        <field name="bg_number"/>
+                        <field name="amount"/>
+                        <field name="start_date"/>
+                        <field name="expiry_date"/>
+                        <field name="claim_end_date"/>
+                        <field name="status"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="reason_wiz_form_view1" model="ir.ui.view">
+        <field name="name">reason.wiz.modal.form.view</field>
+        <field name="model">reason.wiz</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="reason"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="save_data_to_reject_reason" icon="fa-check-square-o" string="Save" type="object"/>
+                    <button string="Cancel" class="oe_highlight" special="cancel" icon="fa-ban"/>
+                </footer>
+
+            </form>
+
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+<!--Action for XLSX to download report in wizard in Excel format-->
+    <report
+            id="wizard_button_report_missing_xlsx"
+            model="import.payment"
+            string="Missing Data"
+            report_type="xlsx"
+            name="csspl_india.missing_data"
+            file="missing_data"/>
+</odoo>

@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_tender_master_user,tender.master.user,model_tender_master,,1,1,1,0
+access_tender_bg_user,tender.bg.user,model_tender_bg,,1,1,1,
+access_tender_stage_user,tender.stage.user,model_tender_stage,,1,1,1,1
+access_tender_type_user,tender.type.user,model_tender_type,,1,1,1,0
+access_emd_master,emd_master,model_emd_master,,1,1,1,1

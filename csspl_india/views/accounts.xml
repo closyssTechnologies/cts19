@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+
+<odoo>
+    <record id="search_view_group_invoice" model="ir.ui.view">
+        <field name="name">Account serach view</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='duedate']" position="after">
+                <filter string="Service Date" name="service_date" context="{'group_by':'service_date:month'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="inherit_account_move_journal_entries" model="ir.ui.view">
+        <field name="name">inherit.account.move.tree.journal_entries</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="batch_payment_id"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="action_tcs_details_repor_inherit" model="ir.ui.view">
+        <field name="name">TDS Report</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account_accountant.view_move_line_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='move_name']" position="after">
+                <field name="supplier_date_related" optional="hide"/>
+                <field name="untaxed_amt_related" optional="hide"/>
+                <field name="gross_amt_related" optional="hide"/>
+            </xpath>
+            <xpath expr="//field[@name='account_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!--    <record id="gst_modulev_invoices_tree_inherit" model="ir.ui.view">-->
+    <!--        <field name="name">account.move.gstr.tree.inherit</field>-->
+    <!--        <field name="model">account.move</field>-->
+    <!--        <field name="inherit_id" ref="gst_invoice_v16.gst_invoice_tree"/>-->
+    <!--        <field name="arch" type="xml">-->
+    <!--            <xpath expr="//field[@name='amount_total_signed']" position="before">-->
+    <!--                <field name="igst" optional="hide"/>-->
+    <!--                <field name="cgst" optional="hide"/>-->
+    <!--                <field name="sgst" optional="hide"/>-->
+    <!--            </xpath>-->
+    <!--        </field>-->
+    <!--    </record>-->
+    <!-- Inherited Tree View From GST Invoice Smart Button   -->
+    <!--    <record id="gst_invoice_tree_view_inherit" model="ir.ui.view">-->
+    <!--        <field name="name">gst_invoice_tree_view_inherit</field>-->
+    <!--        <field name="model">account.move</field>-->
+    <!--        <field name="inherit_id" ref="gst_invoice_v16.gst_invoice_tree"/>-->
+    <!--        <field name="arch" type="xml">-->
+    <!--            <xpath expr="//field[@name='amount_total_signed']" position="before">-->
+    <!--                <field name="cgst" sum="Total CGST"/>-->
+    <!--                <field name="sgst" sum="Total SGST"/>-->
+    <!--                <field name="igst" sum="Total IGST"/>-->
+    <!--                <field name="amount_tax_signed"/>-->
+    <!--                <field name="amount_untaxed_signed"/>-->
+    <!--            </xpath>-->
+    <!--        </field>-->
+    <!--    </record>-->
+    <record model="ir.ui.menu" id="account.menu_action_account_payments_receivable">
+        <field name="name">Receipts</field>
+    </record>
+
+
+    <record id="inherit_account_move" model="ir.ui.view">
+        <field name="name">inherit.account.move.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <!--            <xpath expr="//group/group[1]/field[@name='ref']" position="after">-->
+            <!--                <field name="partner_id_line"-->
+            <!--                       invisible="move_type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt') or custom_payment_type == 'outbound' or custom_payment_type == 'inbound'"/>-->
+            <!--            </xpath>-->
+            <xpath expr="//group[@id='header_right_group']" position="inside">
+                <field name="batch_payment_id" invisible="move_type != 'entry'"/>
+            </xpath>
+
+            <xpath expr="//field[@name='delivery_date']" position="after">
+                <field name="service_date"
+                       required="move_type in ('out_invoice', 'out_refund')"
+                />
+                <field name="ref" string="PO NO"
+                       invisible="move_type != 'out_invoice' and move_type != 'in_invoice'"/>
+                <field name="po_date"
+                       invisible="move_type != 'out_invoice' and move_type != 'in_invoice'"/>
+
+                <!--                <field name="analytic_distribution_id"-->
+                <!--                       attrs="{'invisible':[('move_type', '!=', 'out_invoice'),('move_type', '!=', 'in_invoice')],'readonly':[('state','=','posted')]}, 'required':[('move_type', '=', 'out_invoice'),('move_type', '=', 'in_invoice')]"/>-->
+
+                <!--                <field name="analytic_distribution_journal_id"-->
+                <!--                       attrs="{'invisible':[('move_type', '!=', 'entry')],'readonly':[('state','=','posted')]}"/>-->
+                <!--                <field name="analytics_plan_id"-->
+                <!--                       attrs="{'invisible':[('move_type', '!=', 'entry')],'readonly':[('state','=','posted')]}, 'required':[('move_type', '=', 'entry')]"/>-->
+
+                <field name="analytic_distribution_id"
+                       invisible="move_type != 'out_invoice' and move_type != 'in_invoice'"
+                       readonly="state == 'posted'"/>
+                <!--                        'required':[('move_type', '=', 'out_invoice')]}"/>-->
+                <field name="analytic_distribution_journal_id"
+                       invisible="move_type != 'entry'" readonly="state == 'posted'"/>
+                <!--                       attrs="{'invisible':[('move_type', '!=', 'entry')],'readonly':[('state','=','posted')], 'required':[('move_type', '=', 'entry')]}"/>-->
+                <field name="move_type"/>
+                <field name="analytics_plan_id"
+                       invisible="move_type != 'entry'" readonly="state == 'posted'"/>
+                <!--                        ,'required':[('move_type', '=', 'entry')]}"/>-->
+
+            </xpath>
+
+            <xpath expr="//field[@name='ref']" position="attributes">
+                <attribute name="string">Memo</attribute>
+            </xpath>
+
+<!--            <xpath expr="//field[@name='ref']" position="after">-->
+<!--                <field name="cheque_no" invisible="custom_payment_type != 'outbound'"/>-->
+<!--                <field name="cheque_dt" invisible="custom_payment_type != 'outbound'"/>-->
+<!--            </xpath>-->
+
+            <xpath expr="//notebook/page[@name='invoice_tab']/field[@name='invoice_line_ids']/list/field[@name='product_id']"
+                   position="attributes">
+                <attribute name="string">Product/Services</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='invoice_tab']/field[@name='invoice_line_ids']/list/field[@name='product_id']"
+                   position="replace">
+                <field name="product_id" optional="show" options="{'no_create': True}" string="Product/Services"
+                       domain="context.get('default_move_type') in ('out_invoice', 'out_refund', 'out_receipt') and [('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)] or [('purchase_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"/>
+            </xpath>
+            <xpath expr="//notebook/page[@name='aml_tab']/field[@name='line_ids']/list/field[@name='debit']"
+                   position="before">
+                <field name="value" optional="hide"/>
+            </xpath>
+
+            <!--            For adding partner address-->
+            <xpath expr="//form/sheet/group/group[2]/div[1]"
+                   position="after">
+                <field name="partner_id" widget="res_partner_many2one" nolabel="1"
+                       context="{
+                                        'res_partner_search_mode': (context.get('default_move_type', 'entry') in ('out_invoice', 'out_refund', 'out_receipt') and 'customer') or (context.get('default_move_type', 'entry') in ('in_invoice', 'in_refund', 'in_receipt') and 'supplier') or False,
+                                        'show_address': 1, 'default_is_company': True, 'show_vat': True}"
+                       domain="[('type', '!=', 'private'), ('company_id', 'in', (False, company_id))]"
+                       options='{"always_reload": True, "no_quick_create": True}'
+                       invisible="move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')"/>
+            </xpath>
+            <xpath expr="//form[1]/sheet[1]/group[1]/group[2]/field[@name='partner_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherited Account Move Line Tree View of Bank Reconcilation   -->
+    <record id="inherit_account_move_line_bank_reco" model="ir.ui.view">
+        <field name="name">inherit_account_move_line_bank_reco</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account_accountant.view_account_move_line_list_bank_rec_widget"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='account_id']" position="after">
+                <field name="ref_bank_no"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--   Account Move Line Bank Reconcilation Search View -->
+    <record id="view_account_move_line_search_bank_rec_widget_inherit" model="ir.ui.view">
+        <field name="name">account.move.line.search.bank_rec_widget_inherit</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account_accountant.view_account_move_line_search_bank_rec_widget"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="ref_bank_no" string="Reference Bank No" filter_domain="[('ref_bank_no', 'ilike', self)]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

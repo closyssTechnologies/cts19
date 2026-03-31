@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="import_payment_wizard_form" model="ir.ui.view">
+        <field name="name">import.payment.wizard.form</field>
+        <field name="model">import.payment</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form>
+<!--                <script>-->
+<!--                    $(document).ready(function(){-->
+<!--                    $('.modal-dialog').css({'width': '100%', 'height': '100%'});-->
+<!--                    $('.modal-content').css({'width': '100%','height': '100%'});-->
+<!--                    $('.modal-body').css({'width': '100%','height': '100%'});-->
+<!--                    });-->
+<!--                </script>-->
+                <group>
+                    <field name="import_type"/>
+                    <field name="file_name" invisible="1"/>
+                    <field name="load_file" filename="file_name"/>
+                </group>
+                <footer>
+                    <button name="import_missing_data" string="Import" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn btn-default" special="cancel"/>
+                </footer>
+
+                <notebook>
+                <page string="Missing Data" name="missing_data">
+                     <button name="download_report_missing" string="Download" type="object" class="oe_highlight"/>
+                    <field name="missing_data_ids">
+                        <list editable="bottom" create="0" delete="0">
+                                <field name="contact_name" readonly="1"/>
+                                <field name="analytics_account" readonly="1"/>
+                                <field name="bank_account" readonly="1"/>
+                                <field name="ifsc_code" readonly="1"/>
+                                <field name="pay_method" readonly="1"/>
+                                <field name="journal_id" readonly="1"/>
+                                <field name="mail_by" readonly="1"/>
+                        </list>
+                    </field>
+                </page>
+            </notebook>
+
+            </form>
+        </field>
+    </record>
+
+
+
+    <record id="action_order_import_file_pmt" model="ir.actions.act_window">
+        <field name="name">Import Payment</field>
+        <field name="res_model">import.payment</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+
+    <menuitem id="menu_order_import_file"
+              name="Import Payment"
+              action="csspl_india.action_order_import_file_pmt"
+              parent="account.menu_finance_payables"
+              sequence="50"/>
+</odoo>

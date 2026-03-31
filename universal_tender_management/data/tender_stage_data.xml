@@ -1,0 +1,27 @@
+<odoo>
+    <record id="stage_identified" model="tender.stage">
+        <field name="name">Tender Identified</field>
+    </record>
+    <record id="stage_lost" model="tender.stage">
+        <field name="name">Lost</field>
+        <field name="is_lost">1</field>
+    </record>
+    <record id="stage_contract" model="tender.stage">
+        <field name="name">Contract Active</field>
+        <field name="is_contract_active">1</field>
+    </record>
+    <record id="stage_completed" model="tender.stage">
+        <field name="name">Completed</field>
+        <field name="is_completed">1</field>
+    </record>
+
+    <record id="view_tender_sequence_" model="ir.sequence">
+        <field name="name">Tender Management</field>
+        <field name="code">tender.master</field>
+        <field name="prefix">TM/%(y)s-%(month)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+
+</odoo>

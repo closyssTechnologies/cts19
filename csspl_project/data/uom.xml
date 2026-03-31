@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <data noupdate="1">
+
+<!--        <record id="project_payments_channel" model="mail.channel">-->
+<!--            <field name="name">Project Payments</field>-->
+<!--        </record>-->
+
+<!--        <record id="project_update_channel" model="mail.channel">-->
+<!--            <field name="name">Project updates</field>-->
+<!--            <field name="description">General announcements for approver</field>-->
+<!--        </record>-->
+
+        <!-- Lumpsum UOM  -->
+        <record id="product_uom_lumpsum" model="uom.uom">
+            <field name="name">ls</field>
+<!--            <field name="category_id" ref="uom.product_uom_categ_unit"/>-->
+<!--            <field name="uom_type">smaller</field>-->
+        </record>
+
+        <!--  Set UOM      -->
+        <record id="product_uom_set" model="uom.uom">
+            <field name="name">set</field>
+<!--            <field name="category_id" ref="uom.product_uom_categ_unit"/>-->
+<!--            <field name="uom_type">smaller</field>-->
+        </record>
+
+        <!--  Each UOM      -->
+        <record id="product_uom_each" model="uom.uom">
+            <field name="name">ea</field>
+<!--            <field name="category_id" ref="uom.product_uom_categ_unit"/>-->
+<!--            <field name="uom_type">smaller</field>-->
+        </record>
+
+        <!--  Point UOM      -->
+        <record id="product_uom_point" model="uom.uom">
+            <field name="name">pt</field>
+<!--            <field name="category_id" ref="uom.uom_categ_length"/>-->
+<!--            <field name="uom_type">smaller</field>-->
+        </record>
+
+        <!-- Running Meter UOM       -->
+        <record id="product_uom_running_meter" model="uom.uom">
+            <field name="name">rm</field>
+<!--            <field name="category_id" ref="uom.uom_categ_length"/>-->
+<!--            <field name="uom_type">smaller</field>-->
+        </record>
+
+        <!-- Running Meter UOM  -->
+        <record id="product_uom_running_feet" model="uom.uom">
+            <field name="name">rft</field>
+<!--            <field name="category_id" ref="uom.uom_categ_length"/>-->
+<!--            <field name="uom_type">smaller</field>-->
+        </record>
+
+        <!-- Manday UOM       -->
+        <record id="product_uom_manday" model="uom.uom">
+            <field name="name">mdy</field>
+<!--            <field name="category_id" ref="uom.uom_categ_wtime"/>-->
+<!--            <field name="uom_type">smaller</field>-->
+        </record>
+
+        <!-- TRP UOM       -->
+        <record id="product_uom_trp" model="uom.uom">
+            <field name="name">trp</field>
+<!--            <field name="category_id" ref="uom.uom_categ_wtime"/>-->
+<!--            <field name="uom_type">smaller</field>-->
+        </record>
+
+        <!--  Metric Ton   -->
+        <record id="product_uom_metric_ton" model="uom.uom">
+            <field name="name">mt</field>
+<!--            <field name="category_id" ref="uom.product_uom_categ_kgm"/>-->
+<!--            <field name="uom_type">smaller</field>-->
+        </record>
+
+        <!--  Month UOM   -->
+        <record id="product_uom_month" model="uom.uom">
+            <field name="name">month</field>
+<!--            <field name="category_id" ref="uom.uom_categ_wtime"/>-->
+<!--            <field name="uom_type">smaller</field>-->
+        </record>
+
+        <!-- million cubic meter       -->
+        <record id="product_uom_mcm" model="uom.uom">
+            <field name="name">mcm</field>
+<!--            <field name="category_id" ref="uom.product_uom_categ_vol"/>-->
+<!--            <field name="uom_type">smaller</field>-->
+        </record>
+
+
+        <record id="priority_star_visible" model="res.groups">
+            <field name="name">Payment Priority</field>
+        </record>
+
+    </data>
+
+</odoo>

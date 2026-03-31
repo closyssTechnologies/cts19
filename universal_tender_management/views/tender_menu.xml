@@ -1,0 +1,51 @@
+<odoo>
+
+    <!-- ROOT MENU -->
+    <menuitem id="menu_tender_root"
+              name="Tender Management"
+              sequence="10"/>
+
+    <!-- MAIN MENUS -->
+    <menuitem id="menu_tender_master"
+              parent="menu_tender_root"
+              action="action_tender_master"
+              name="Tenders"
+              sequence="10"/>
+
+    <menuitem id="menu_tender_reports"
+              parent="menu_tender_root"
+              name="Report"
+              sequence="80"/>
+
+    <menuitem id="menu_tender_bg"
+              parent="menu_tender_reports"
+              action="action_tender_bg"
+              name="Bank Guarantees"
+              sequence="20"/>
+
+    <menuitem id="menu_tender_emd"
+              parent="menu_tender_reports"
+              action="action_tender_emd"
+              name="EMD"
+              sequence="20"/>
+
+    <!-- CONFIGURATION ROOT (THIS WAS MISSING) -->
+    <menuitem id="menu_tender_config"
+              parent="menu_tender_root"
+              name="Configuration"
+              sequence="90"/>
+
+    <!-- CONFIG MENUS -->
+    <menuitem id="menu_tender_stage"
+              parent="menu_tender_config"
+              action="action_tender_stage"
+              name="Tender Stages"
+              sequence="10"/>
+
+    <menuitem id="menu_tender_type"
+              parent="menu_tender_config"
+              action="action_tender_type"
+              name="Tender Types"
+              sequence="20"/>
+
+</odoo>

@@ -1,0 +1,8 @@
+<odoo>
+    <record id="group_tender_user" model="res.groups">
+        <field name="name">Tender Team</field>
+    </record>
+    <record id="group_tender_finance" model="res.groups">
+        <field name="name">Tender Finance</field>
+    </record>
+</odoo>

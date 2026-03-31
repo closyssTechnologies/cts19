@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<odoo>
+    <record id="payment_report_list" model="ir.ui.view">
+        <field name="name">Payment Report</field>
+        <field name="model">payment.anal.report</field>
+        <field name="arch" type="xml">
+            <list action="action_open_payment" type="object">
+                <field name="date"/>
+                <field name="payment_name"/>
+                <field name="journal_id"/>
+                <field name="payment_method_line_id"/>
+                <field name="partner_id"/>
+                <field name="batch_payment_id"/>
+                <field name="transfer_date"/>
+                <field name="amount"/>
+                <field name="analytics_plan_id" optional="show"/>
+                <field name="analytics_account_id" optional="show"/>
+                <field name="month" optional="show"/>
+                <field name="payment_id"/>
+                <field name="contigency"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="payment_report_pivot" model="ir.ui.view">
+        <field name="name">Payment Pivot</field>
+        <field name="model">payment.anal.report</field>
+        <field name="arch" type="xml">
+            <pivot></pivot>
+        </field>
+    </record>
+
+    <record id="payment_report_search" model="ir.ui.view">
+        <field name="name">Payment Search</field>
+        <field name="model">payment.anal.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="month"/>
+                <field name="payment_method_line_id"/>
+                <filter name="batch_payment" string="Batch Payment" domain="[('batch_payment_id','!=',False)]"/>
+                <group>
+                    <filter name="group_month" string="Month" domain="[]" context="{'group_by': 'month'}"/>
+                    <filter name="group_transfer_date" string="Transfer Date" domain="[]" context="{'group_by': 'transfer_date'}"/>
+                    <filter name="group_batch_payment" string="Batch Payment" domain="[]" context="{'group_by': 'batch_payment_id'}"/>
+                    <filter name="group_analytic_plan" string="Analytic Plan" domain="[]" context="{'group_by': 'analytics_plan_id'}"/>
+                    <filter name="group_analytic_account" string="Analytic Account" domain="[]" context="{'group_by': 'analytics_account_id'}"/>
+                    <filter name="group_payment_method_line_id" string="Payment Method" domain="[]" context="{'group_by': 'payment_method_line_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="payment_report_action" model="ir.actions.act_window">
+        <field name="name">Payment Report</field>
+        <field name="res_model">payment.anal.report</field>
+        <field name="view_mode">list,pivot</field>
+    </record>
+
+    <record id="action_payment_anal_report" model="ir.actions.server">
+        <field name="name">Payment Analytic Report</field>
+        <field name="model_id" ref="csspl_india.model_payment_anal_report"/>
+        <field name="state">code</field>
+        <field name="code">action = records.fetch_data_query()</field>
+    </record>
+
+<!--    <menuitem id='payment_root' name="Payment Analytic Report" parent="account.menu_finance_payables" action="csspl_india.action_payment_anal_report"/>-->
+</odoo>

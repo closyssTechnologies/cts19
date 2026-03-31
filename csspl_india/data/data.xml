@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <data>
+        <!--        # quotation is made because in sale order quotation to be start from q.-->
+        <record id="view_rnm_sequence_quotation" model="ir.sequence">
+            <field name="name">RNM</field>
+            <field name="code">rnm.code</field>
+            <field name="prefix">RNM</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="view_partner_ledger" model="res.groups">
+            <field name="name">Partner Ledger</field>
+        </record>
+
+        <record id="mail_template_of_batch_rejection" model="mail.template">
+            <field name="name">Send Mail on Batch Rejection</field>
+            <field name="model_id" ref="account_batch_payment.model_account_batch_payment"/>
+            <field name="subject">Batch Rejected (Ref {{ object.name }})</field>
+            <field name="email_from">{{ object.env.user.email }}</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Hello <t t-out="object.cancelled_payments_ids.mapped('request_by')">Brandon Freeman</t>,
+                        <br/>
+                        <br/>
+                        With Reference to the request you raised, Your Batch <b><span t-out="object.name"/></b> has been rejected
+                        for the amount of <b><span t-out="object.amt_total_value"/></b> on
+                        <b><span t-esc="format_datetime(datetime.datetime.now())"/></b>
+                        due to the reason
+                        <b><span t-esc="object.rej_reason"/> </b>
+                        <br/>
+                        <br/>
+                        Best regards,
+                         <p>Thank you.</p>
+                    </p>
+                </div>
+            </field>
+        </record>
+
+    </data>
+</odoo>

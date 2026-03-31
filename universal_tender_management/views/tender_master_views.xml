@@ -1,0 +1,153 @@
+<odoo>
+
+    <!-- ACTION -->
+    <record id="action_tender_master" model="ir.actions.act_window">
+        <field name="name">Tenders</field>
+        <field name="res_model">tender.master</field>
+        <field name="view_mode">kanban,tree,form</field>
+    </record>
+
+    <!-- TREE -->
+    <record id="view_tender_master_tree" model="ir.ui.view">
+        <field name="name">tender.master.tree</field>
+        <field name="model">tender.master</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="tender_number"/>
+                <field name="name"/>
+                <field name="reference"/>
+                <field name="partner_id"/>
+                <field name="tender_type_id"/>
+                <field name="estimated_value"/>
+                <field name="stage_id"/>
+                <field name="owner_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- KANBAN -->
+    <record id="view_tender_master_kanban" model="ir.ui.view">
+        <field name="name">tender.master.kanban</field>
+        <field name="model">tender.master</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id">
+                <field name="name"/>
+                <field name="estimated_value"/>
+                <field name="partner_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <strong>
+                                <field name="name"/>
+                            </strong>
+                            <div>
+                                <field name="partner_id"/>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left text-muted">
+                                    Value:
+                                    <field name="estimated_value"/>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="tender_number" widget="badge" decoration-success="tender_number"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="view_tender_master_form" model="ir.ui.view">
+        <field name="name">tender.master.form</field>
+        <field name="model">tender.master</field>
+        <field name="arch" type="xml">
+            <form string="Tender">
+                <header>
+                    <button name="action_reset_draft" string="Tender Identified" type="object" class="oe_highlight"
+                            attrs="{'invisible': [('is_lost', '=', False)]}"/>
+                    <button name="action_mark_completed" string="Mark Completed" type="object" class="oe_highlight"
+                            attrs="{'invisible': ['|', ('is_completed', '=', True), ('is_lost', '=', True)]}"/>
+                    <button name="action_mark_lost" string="Mark Lost" type="object" class="oe_highlight"
+                            attrs="{'invisible': ['|', ('is_completed', '=', True), ('is_lost', '=', True)]}"/>
+                    <field name="stage_id" widget="statusbar"/>
+                    <field name="is_lost" invisible="1"/>
+                    <field name="is_completed" invisible="1"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="tender_number" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="reference"/>
+                            <field name="partner_id"/>
+                            <field name="tender_type_id"/>
+                            <field name="source"/>
+                        </group>
+                        <group>
+                            <field name="estimated_value"/>
+                            <field name="submission_due_date"/>
+                            <field name="contract_duration"/>
+                            <field name="owner_id"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+
+                        <page string="EMD">
+                            <field name="emd_ids">
+                                <tree editable="bottom">
+                                    <field name="emd_purpose" string="Purpose"/>
+                                    <field name="emd_required"/>
+                                    <field name="emd_amount" string="Amount"/>
+                                    <field name="emd_type" string="Type"/>
+                                    <field name="emd_attachment" widget="many2many_binary" string="Attachment"/>
+                                    <field name="bank_name" string="Bank"/>
+                                    <field name="submitted_date" string="Submitted Date"/>
+                                    <field name="expiry_date" string="Expiry Date"/>
+                                    <field name="emd_status" string="Status"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Bank Guarantees">
+                            <field name="bg_ids">
+                                <tree editable="bottom">
+                                    <field name="purpose"/>
+                                    <field name="bank_name"/>
+                                    <field name="amount"/>
+                                    <field name="expiry_date"/>
+                                    <field name="status"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Contract">
+                            <group>
+                                <field name="contract_number"/>
+                                <field name="contract_start_date"/>
+                                <field name="contract_end_date"/>
+                                <field name="project_id"/>
+                            </group>
+                        </page>
+                        <page string="Finance">
+                            <group>
+                                <field name="final_payment_received"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+</odoo>

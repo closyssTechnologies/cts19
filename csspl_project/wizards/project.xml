@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="dispatch_material_tree_view" model="ir.ui.view">
+        <field name="name">dispatch_material_tree_view</field>
+        <field name="model">dispatch.material</field>
+        <field name="arch" type="xml">
+            <list export_xlsx="0" editable="bottom">
+                <header>
+                    <button name="create_do" string="Dispatch" class="btn-primary" type="object"/>
+                </header>
+                <field name="product_id"/>
+                <field name="pending_qty"/>
+                <field name="to_dispatch"/>
+                <field name="boq_line_id" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="task_invoice_tree_view" model="ir.ui.view">
+        <field name="name">task_invoice_tree_view</field>
+        <field name="model">task.invoices</field>
+        <field name="arch" type="xml">
+            <list export_xlsx="0" editable="bottom">
+                <header>
+                    <button name="create_invoice" string="Create" class="btn-primary" type="object"/>
+                </header>
+                <field name="task_id" options="{'no_open': True}"/>
+                <field name="task_amount"/>
+                <field name="product_id" string="Invoice Product" options="{'no_open': True, 'no_create': True}" required="True"/>
+                <field name="quantity"/>
+                <field name="amount"/>
+                <field name="amount_total"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="task_material_form_view" model="ir.ui.view">
+        <field name="name">task_material_form_view</field>
+        <field name="model">boq.materials.wiz</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="project_id" options="{'no_create': True, 'no_edit': False, 'no_open': True}"/>
+                    <field name="task_id" widget="many2many_tags" options="{'no_create': True, 'no_edit': False, 'no_open': True}"/>
+                </group>
+                <field name="material_ids" widget="one2many_search">
+                    <list create="0" editable="bottom">
+                        <field name="project_id" invisible="1" options="{'no_create': True, 'no_edit': False, 'no_open': True}"/>
+                        <field name="task_id" readonly="1"  options="{'no_create': True, 'no_edit': False, 'no_open': True}" widget="many2many_tags"/>
+                        <field name="product_id" readonly="1"  options="{'no_create': True, 'no_edit': False, 'no_open': True}"/>
+                        <field name="uom_id" readonly="1" force_save="1" options="{'no_open': True, 'no_create': True}"/>
+                        <field name="description"/>
+                        <field name="demand_qty" readonly="1"/>
+                        <field name="quantity" />
+                        <field name="price_unit"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_add_material" string="Add Material" class="btn btn-primary" type="object"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

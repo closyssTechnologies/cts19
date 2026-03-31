@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<odoo>
+    <record model="ir.ui.view" id="analytic_plan_dashboard">
+        <field name="name">Analytic Dashboard</field>
+        <field name="model">account.dashboard.wiz</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="date"/>
+                <field name="analytic_plan" optional="hide"/>
+                <field name="partner_id" optional="show"/>
+                <field name="sales" sum="Total Sales"/>
+                <field name="payed" optional="show" sum="Total Expense"/>
+                <field name="received" sum="Total Received" string="Total Received"/>
+                <field name="outstanding" sum="Total Outstanding"/>
+                <button name="action_view_related_record" string="View" type="object" class="btn-sm btn-light"/>
+            </list>
+        </field>
+    </record>
+
+    <!--   Analytic Dashboard Search View     -->
+    <record id="analytic_dashboard_search_view" model="ir.ui.view">
+        <field name="name">analytic_dashboard_search_view</field>
+        <field name="model">account.dashboard.wiz</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="analytic_plan"/>
+                <filter string="Sales Customer" name="active" domain="[('partner_type', '=','customer')]"/>
+                <group>
+                    <filter string="Analytic Plan" name="analytic_plan" context="{'group_by': 'analytic_plan'}"/>
+                    <filter string="Partner" name="partner_id" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Date" name="date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="analytic_dashboard_action" model="ir.actions.server">
+        <field name="name">Analytic Dashboard</field>
+        <field name="model_id" ref="csspl_project.model_account_dashboard_wiz"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_analytic_dashboard()</field>
+    </record>
+
+    <menuitem name="Analytic Dashboard" id="menu_analytic_dashboard" action="analytic_dashboard_action"
+              parent="account.menu_board_journal_1"/>
+
+    <record id="import_invoice_receipt_form_view" model="ir.ui.view">
+        <field name="name">import_invoice_receipt_form_view</field>
+        <field name="model">import.invoice.receipt</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="file"/>
+                <footer>
+                    <button name="import_invoice_receipt" class="btn btn-primary" string="Import Invoice Receipt"
+                            type="object"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_import_invoice_receipt">
+        <field name="name">Import Receipts</field>
+        <field name="res_model">import.invoice.receipt</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_import_receipts" name="Import Receipts" action="action_import_invoice_receipt"
+              parent="account.menu_finance_receivables"/>
+
+    <record id="payment_report_tree_view" model="ir.ui.view">
+        <field name="name">payment_report_tree_view</field>
+        <field name="model">payment.report</field>
+        <field name="arch" type="xml">
+            <list action="action_open_reference" type="object">
+                <field name="date"/>
+                <field name="move_id" string="Number"/>
+                <field name="journal_id"/>
+                <field name="partner_id"/>
+                <field name="analytic_account_id" optional="show"/>
+                <field name="analytic_plan_id" optional="show"/>
+                <field name="account_id" optional="hide"/>
+                <field name="credit"/>
+                <field name="debit"/>
+                <field name="transfer_date" optional="hide"/>
+                <field name="month" optional="hide"/>
+                <field name="payment_method_line_id" optional="hide"/>
+                <field name="batch_payment_id" optional="hide"/>
+                <field name="amount_in_currency" optional="hide"/>
+                <field name="currency_id" optional="hide"/>
+                <field name="company_currency_id" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="payment_report_form_view" model="ir.ui.view">
+        <field name="name">payment_report_form_view</field>
+        <field name="model">payment.report</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="date"/>
+                    <field name="move_id" string="Number"/>
+                    <field name="journal_id"/>
+                    <field name="partner_id"/>
+                    <field name="credit"/>
+                    <field name="debit"/>
+                    <field name="amount_in_currency" optional="hide"/>
+                    <field name="currency_id" optional="hide"/>
+                    <field name="company_currency_id" invisible="1"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="payment_report_search" model="ir.ui.view">
+        <field name="name">Payment Report Search</field>
+        <field name="model">payment.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="move_id" string="Number"/>
+                <field name="journal_id"/>
+                <field name="analytic_account_id"/>
+                <field name="analytic_plan_id"/>
+                <field name="month"/>
+                <field name="payment_method_line_id"/>
+                <filter name="batch_payment_id" string="Batch Payment" domain="[('batch_payment_id','!=',False)]"/>
+                <group>
+                    <filter name="group_partner" string="Partner" domain="[]" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_month" string="Month" domain="[]" context="{'group_by': 'month'}"/>
+                    <filter name="group_transfer_date" string="Transfer Date" domain="[]"
+                            context="{'group_by': 'transfer_date'}"/>
+                    <filter name="group_batch_payment" string="Batch Payment" domain="[]"
+                            context="{'group_by': 'batch_payment_id'}"/>
+                    <filter name="group_analytic_plan" string="Analytic Plan" domain="[]"
+                            context="{'group_by': 'analytic_plan_id'}"/>
+                    <filter name="group_analytic_account" string="Analytic Account" domain="[]"
+                            context="{'group_by': 'analytic_account_id'}"/>
+                    <filter name="group_payment_method_line_id" string="Payment Method" domain="[]"
+                            context="{'group_by': 'payment_method_line_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="server_action_payment_report" model="ir.actions.server">
+        <field name="name">Server Action Payment Report</field>
+        <field name="model_id" ref="csspl_project.model_payment_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_run_report()</field>
+    </record>
+
+    <menuitem id="menu_payment_report" name="Payment Report" action="server_action_payment_report"
+              parent="account.menu_finance_reports"/>
+
+</odoo>

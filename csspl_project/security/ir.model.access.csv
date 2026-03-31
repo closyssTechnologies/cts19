@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+boq.lines,boq.lines,model_boq_lines,base.group_user,1,1,1,1
+dispatch_material,dispatch.material,model_dispatch_material,base.group_user,1,1,1,1
+task.invoices,task.invoices,model_task_invoices,base.group_user,1,1,1,1
+product.kit,product.kit,model_product_kit,base.group_user,1,1,1,1
+uom.conversion,uom.conversion,model_uom_conversion,base.group_user,1,1,1,1
+boq_materials_wiz,boq_materials_wiz,model_boq_materials_wiz,base.group_user,1,1,1,1
+deleted.records,deleted.records,model_deleted_records,base.group_user,1,1,1,1
+account.dashboard.wiz,account.dashboard.wiz,model_account_dashboard_wiz,base.group_user,1,1,1,1
+import.invoice.receipt,import.invoice.receipt,model_import_invoice_receipt,base.group_user,1,1,1,1
+atm.id,atm.id,model_atm_id,base.group_user,1,1,1,1
+payments.month,payments.month,model_payments_month,,1,1,1,1
+payment.report,payment.report,model_payment_report,base.group_user,1,1,1,1
+access_work_order_type,access_work_order_type,model_work_order_type,base.group_user,1,1,1,1
+access_change_journal,access_change_journal,model_change_journal,base.group_user,1,1,1,1
+access_payment_for_master,access_payment_for_master,model_payment_for_master,base.group_user,1,1,1,1
+access_voucher_account_master,access_voucher_account_master,model_voucher_account_master,base.group_user,1,1,1,1

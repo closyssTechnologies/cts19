@@ -1,0 +1,22 @@
+<odoo>
+
+    <record id="action_tender_stage" model="ir.actions.act_window">
+        <field name="name">Tender Stages</field>
+        <field name="res_model">tender.stage</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_tender_stage_tree" model="ir.ui.view">
+        <field name="model">tender.stage</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="sequence"/>
+                <field name="is_lost"/>
+                <field name="is_contract_active"/>
+                <field name="is_completed"/>
+            </tree>
+        </field>
+    </record>
+
+</odoo>

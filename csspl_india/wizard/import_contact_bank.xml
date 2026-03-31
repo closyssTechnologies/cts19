@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="import_payment_wizard_form_contact" model="ir.ui.view">
+        <field name="name">import.payment.wizard.form</field>
+        <field name="model">contact.cust</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="import_type" widget="radio"/>
+                        <field name="load_file" filename="file_name"/>
+                        <field name="file_name" invisible="1"/>
+                    </group>
+                </sheet>
+
+                <footer>
+                    <button name="import_missing_contact" string="Import" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn btn-default" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_order_import_file" model="ir.actions.act_window">
+        <field name="name">Import Contact</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">contact.cust</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="import_payment_wizard_form_contact"/>
+        <field name="target">new</field>
+    </record>
+
+
+    <menuitem id="menu_order_import_file_missing"
+              name="Import Contact"
+              action="csspl_india.action_order_import_file"
+              parent="contacts.res_partner_menu_config"
+              sequence="0"/>
+
+    <!--    IFSC UPDATE XML CODE-->
+    <record id="ifsc_update_form_contact" model="ir.ui.view">
+        <field name="name">ifsc.update.form</field>
+        <field name="model">ifsc.update</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="load_file_ic"/>
+                    </group>
+                </sheet>
+
+                <footer>
+                    <button name="import_missing_ifsc" string="Import" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn btn-default" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_order_ifsc_file" model="ir.actions.act_window">
+        <field name="name">Import Contact</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ifsc.update</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="ifsc_update_form_contact"/>
+        <field name="target">new</field>
+    </record>
+
+
+    <menuitem id="menu_order_ifsc_update"
+              name="IFSC Update"
+              action="csspl_india.action_order_ifsc_file"
+              parent="contacts.res_partner_menu_config"
+              sequence="10"/>
+</odoo>

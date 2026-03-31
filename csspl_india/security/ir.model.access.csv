@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+import.payment,import.payment,model_import_payment,base.group_user,1,1,1,1
+reason.wizard,reason.wiz,model_reason_wiz,base.group_user,1,1,1,1
+import.failed.contacts,import.failed.contacts,model_import_failed_contacts,base.group_user,1,1,1,1
+contact.cust,contact.cust,model_contact_cust,base.group_user,1,1,1,1
+ifsc.update,ifsc.update,model_ifsc_update,base.group_user,1,1,1,1
+custom.excel.class,custom.excel.class,model_custom_excel_class,base.group_user,1,1,1,1
+excel_merge_wizard,excel.merge.wizard,model_excel_merge_wizard,,1,1,1,1
+payment_anal_report,payment.anal.report,model_payment_anal_report,,1,1,1,1
+send_checker,send_checker,model_send_checker,,1,1,1,1
+access_contact_report,access_contact_report,model_contact_report,base.group_user,1,1,1,1

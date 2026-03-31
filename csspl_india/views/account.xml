@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <!--    adding a service date in invoice analysis-->
+    <record id="search_view_inherit_pivot" model="ir.ui.view">
+        <field name="name">Account Pivot View</field>
+        <field name="model">account.invoice.report</field>
+        <field name="inherit_id" ref="account.view_account_invoice_report_pivot"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_subtotal']" position="after">
+                <field name="service_date" type="row"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--    added in group by default for service date-->
+    <record id="search_view_group_inherit_pivot" model="ir.ui.view">
+        <field name="name">Account Pivot group View</field>
+        <field name="model">account.invoice.report</field>
+        <field name="inherit_id" ref="account.view_account_invoice_report_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='invoice_date']" position="after">
+                <filter string="Service Date" name="service_date" context="{'group_by':'service_date:month'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--    showing account entries to all the user no matter he is having the account access or not-->
+    <!--    <record id="field_account_inherit" model="ir.ui.view">-->
+    <!--        <field name="name">Account Entries</field>-->
+    <!--        <field name="model">res.partner</field>-->
+    <!--        <field name="inherit_id" ref="account.view_partner_property_form"/>-->
+    <!--        <field name="arch" type="xml">-->
+    <!--            <xpath expr="//group[@name='accounting']" position="replace">-->
+    <!--                <group string="Accounting Entries" name="accounting_entries">-->
+    <!--                    <field name="currency_id" invisible="1"/>-->
+    <!--                    <field name="property_account_receivable_id"/>-->
+    <!--                    <field name="property_account_payable_id"/>-->
+    <!--                </group>-->
+    <!--            </xpath>-->
+    <!--        </field>-->
+    <!--    </record>-->
+
+
+    <!--    <record id="report_followup_inherit" model="ir.ui.view">-->
+    <!--        <field name="name">account.move.for.follow.up</field>-->
+    <!--        <field name="model">res.partner</field>-->
+    <!--        <field name="inherit_id" ref="account_followup.customer_statements_form_view"/>-->
+    <!--        <field name="arch" type="xml">-->
+    <!--            <xpath expr="//form/sheet/field[@name='unreconciled_aml_ids']/list/field[@name='date_maturity']"-->
+    <!--                   position="after">-->
+    <!--                <field name="analytic_id" optional="hide"/>-->
+    <!--                <field name="analytic_dist_id" optional="show"/>-->
+    <!--            </xpath>-->
+    <!--        </field>-->
+    <!--    </record>-->
+
+
+    <!-- Inherited Account Batch Payment Search View   -->
+    <record id="view_account_batch_payment_search_bank_rec_widget" model="ir.ui.view">
+        <field name="name">account.batch.payment.search.bank_rec_widget_inherit</field>
+        <field name="model">account.batch.payment</field>
+        <field name="inherit_id" ref="account_batch_payment.view_batch_payment_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search/field[@name='name']" position="before">
+                <field name="ref_bank_no" string="Reference Bank No" filter_domain="[('ref_bank_no', 'ilike', self)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--    <record id="view_account_payment_form_inherit1" model="ir.ui.view">-->
+    <!--        <field name="name">view.account.payment.form.inherit</field>-->
+    <!--        <field name="model">account.payment</field>-->
+    <!--        <field name="inherit_id" ref="csspl_india.view_account_payment_form_reconcile"/>-->
+    <!--        <field name="arch" type="xml">-->
+    <!--            <xpath expr="//field[@name='partial_lines']/.." position="after">-->
+    <!--                <page name="extra_info" string="Other Info"-->
+    <!--                      invisible="payment_type not in ('outbound')">-->
+    <!--                    <group>-->
+    <!--                        <group>-->
+    <!--                            <field name="request_by"/>-->
+    <!--                            <field name="request_received_date" widget="date"/>-->
+    <!--                            <field name="sup_name" options="{'no_create': True}"/>-->
+    <!--                        </group>-->
+    <!--                        <group>-->
+    <!--                            <field name="customer_ch"/>-->
+    <!--                            <field name="bank"/>-->
+    <!--                            <field name="atm_id"/>-->
+    <!--                            <field name="mail_by"/>-->
+    <!--                            <field name="requester_mail_id"/>-->
+    <!--                        </group>-->
+    <!--                    </group>-->
+    <!--                </page>-->
+    <!--            </xpath>-->
+    <!--        </field>-->
+    <!--    </record>-->
+
+    <record model="ir.ui.view" id="view_account_payment_search_inherit_csspl_india">
+        <field name="name">view_account_payment_search_inherit_csspl_india</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='journal_id']" position="after">
+                <field name="batch_payment_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_payment_form" model="ir.ui.view">
+        <field name="name">view.account.payment.form</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='button_open_journal_entry']" position="attributes">
+                <attribute name="groups">account.group_account_manager,account.group_account_user</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_post']" position="attributes">
+                <attribute name="invisible">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//form/sheet/group/group[2]/field[@name='payment_method_line_id']"
+                   position="after">
+                <field name="cheque_number1"/>
+                <field name="cheque_date"/>
+                <!--attrs="{'invisible': [('partner_type','=','customer')]}"-->
+                <!--                <field name="s_check" attrs="{'readonly': [('state','=','posted')]}"/>-->
+                <!--                <field name="advances_check" attrs="{'readonly': [('state','=','posted')]}"/>-->
+                <!--                <field name="loans_check" attrs="{'readonly': [('state','=','posted')]}"/>-->
+                <field name="analytics_plan_id" required="0" options="{'no_create': True}"/>
+                <field name="analytics_account_id" required="0" options="{'no_create': True}"
+                       domain="[('plan_id','=',analytics_plan_id)]"/>
+                <!--                <field name="unique_id"/>-->
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="partner_bank_id"/>
+            </xpath>
+            <xpath expr="//field[@name='memo']" position="after">
+                <field name="bank_acc_related"/>
+                <field name="reason_text" invisible="payment_type == 'inbound'"/>
+                <field name="narration" string="UTR No" readonly="0"/>
+                <field name="source_doc" readonly="1"/>
+                <field name="css_local_branch"/>
+                <field name="css_state"/>
+                <field name="month"/>
+                <!--                <field name="contigency"/>-->
+                <field name="payment_reference"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--    List view payment-->
+    <record id="view_account_payment_list" model="ir.ui.view">
+        <field name="name">view.account.payment.list</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_supplier_payment_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_signed']" position="after">
+                <field name="bank_acc_related" optional="hide"/>
+                <field name="reason_text" readonly="1" optional="hide"/>
+                <field name="source_doc" optional="hide"/>
+                <field name="css_state" optional="hide"/>
+                <field name="css_local_branch" optional="hide"/>
+                <field name="month" optional="hide"/>
+                <field name="narration" optional="hide"/>
+                <field name="transfer_date" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--    List view payment-->
+    <record id="view_account_payment_list_from_smart_button" model="ir.ui.view">
+        <field name="name">view.account.payment.list.smart</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id"
+               ref="account_batch_payment.view_account_payment_tree_popup_inherit_account_batch_payment"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="transfer_date" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!--    Inherited Batch Payment view-->
+    <record id="view_account_batch_payment_form1" model="ir.ui.view">
+        <field name="name">view.account.batch.payment.form</field>
+        <field name="model">account.batch.payment</field>
+        <field name="inherit_id" ref="account_batch_payment.view_batch_payment_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//sheet/group" position="before">
+                <div name="button_box" class="oe_button_box">
+
+                    <button type="object"
+                            string="Summary"
+                            name="compute_calculate_payments"
+                            readonly="1"
+                            class="oe_stat_button">
+                        <div style="font-size: 10px" class="o_field_widget o_stat_info mr4">
+                            <span class="o_stat_text">
+                                <b>Accepted:</b>
+                            </span>
+                            <span class="o_stat_text">
+                                <b>Rejected:</b>
+                            </span>
+                            <span class="o_stat_text">
+                                <b>Total :</b>
+                            </span>
+                        </div>
+                        <div style="font-size: 10px" class="o_field_widget o_stat_info">
+                            <span class="o_stat_value">
+                                <field name="accepted"/>
+                            </span>
+                            <span class="o_stat_value">
+                                <field name="rejected"/>
+                            </span>
+                            <span class="o_stat_value">
+                                <field name="total_count"/>
+                            </span>
+                        </div>
+                        <div style="font-size: 10px" class="o_field_widget o_stat_info">
+                            <span class="o_stat_value">
+                                <field name="total_accepted"/>
+                            </span>
+                            <span class="o_stat_value">
+                                <field name="total_rejected"/>
+                            </span>
+                            <span class="o_stat_value">
+                                <field name="total_payment"/>
+                            </span>
+                        </div>
+                    </button>
+
+                    <button name="open_cancelled_payments"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-bars"
+                            invisible="cancelled_order_count == 0">
+                        <div class="o_field_widget o_stat_info">
+                            <span>
+                                <field name="cancelled_order_count"/>
+                            </span>
+                            <span class="o_stat_text">Cancelled Payments</span>
+                        </div>
+                    </button>
+                </div>
+            </xpath>
+            <xpath expr="//notebook//page[@name='batch_content']/field[@name='payment_ids']/list/field[@name='partner_id']"
+                   position="after">
+                <field name="partner_bank_id"/>
+            </xpath>
+
+            <xpath expr="//field[@name='journal_id']" position="attributes">
+                <attribute name="readonly">state in ('sent', 'reconciled')</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='payment_method_id']" position="attributes">
+                <attribute name="readonly">state in ('pending_transfer', 'sent', 'reconciled')</attribute>
+            </xpath>
+
+            <xpath expr="//sheet//group//field[@name='date']" position="after">
+                <field name="is_management_approved" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//sheet//group//field[@name='date']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//header/button[@name='validate_batch_button'][2]" position="replace">
+                <button name="validate_batch_button" class="oe_highlight" string="Validate" type="object"
+                        invisible="state not in ['pending_transfer'] or payment_ids == []"/>
+            </xpath>
+
+            <xpath expr="//header" position="inside">
+                <button name="send_for_checking" string="Send For Checking" type="object"
+                        groups="csspl_india.group_payments_maker"
+                        invisible="to_check or is_checked or state != 'draft'"/>
+                <button name="management_approve" string="Management Approval" type="object" groups="base.group_system"
+                        invisible="is_management_approved or state != 'approved'"/>
+                <button name="bank_upload" string="Bank Upload" type="object"
+                        invisible="state not in ['management_approved']"/>
+                <button name="pending_transfer" string="Submit" type="object"
+                        invisible="state not in ['bank_upload']"/>
+                <button name="button_set_checked" string="Approve" type="object"
+                        groups="csspl_india.group_payments_checker"
+                        invisible="not to_check or is_checked"/>
+                <button name="reject" type="object" string="Reject"
+                        invisible="state in ['sent','reconciled'] or state == 'reject'"
+                        groups="csspl_india.group_payments_checker"/>
+                <button name="resend_for_approval" type="object" string="Resend for Approval"
+                        invisible="state != 'reject'"/>
+            </xpath>
+
+
+            <xpath expr="//form[1]/sheet[1]/group[1]/group[2]/field[@name='name']" position="after">
+                <field name="pdf_drawing_name" invisible="1"/>
+                <field name="pdf_attachment_name" invisible="1"/>
+                <field name="rej_reason"/>
+                <field name="subject_line" required="1"/>
+                <field name="attachment_batch" required="state in ['draft','submitted']"
+                       readonly="state in ['management_approval','bank_upload','pending_transfer','sent']"
+                       filename="pdf_drawing_name"/>
+                <field name="working_attachment" invisible="1" filename="pdf_attachment_name"/>
+                <field name="is_amt_bool" invisible="1"/>
+                <field name="amt_total_value" readonly="1"/>
+                <field name="approved_date" invisible="not is_management_approved"
+                       readonly="1"/>
+            </xpath>
+
+            <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='payment_method_id']" position="after">
+                <field name="analytics_plans_batch_id" options="{'no_create': True, 'no_edit': True, 'no_open': True}"
+                       readonly="state not in ['draft','submitted']"/>
+                <field name="ref_bank_no"/>
+                <field name="bank_date" string="Transfer Date" readonly="state == 'sent'"/>
+                <field name="date" readonly="1"/>
+                <field name="analytics_account_id"/>
+                <field name="to_check" invisible="1"/>
+                <field name="is_reject" invisible="1"/>
+                <field name="is_checked" invisible="1" readonly="1"/>
+                <field name="is_checked_approve" readonly="1"/>
+                <field name="checker_id" groups="base.group_erp_manager" readonly="1"/>
+                <button name="%(action_advance_xlwt)d" string="Bank Format" class="btn-primary" type="action"
+                        invisible="state not in ['bank_upload']"/>
+            </xpath>
+
+            <xpath expr="//field[@name='amount_signed']" position="after">
+                <field name="bank_acc_related" optional="hide"/>
+                <field name="analytics_plan_id" optional="hide"/>
+                <field name="analytics_account_id" options="{'no_create': True, 'no_edit': True, 'no_open': True}"
+                       optional="hide"/>
+                <field name="reason_text" optional="hide"/>
+                <field name="narration" optional="hide"/>
+                <field name="css_state" optional="hide"/>
+                <field name="month" optional="hide"/>
+                <field name="css_local_branch" optional="hide"/>
+                <button name="reject_payment" column_invisible="parent.state == 'sent'" string="Reject"
+                        type="object" icon="fa-trash"/>
+            </xpath>
+
+
+        </field>
+    </record>
+
+
+    <record id="view_batch_payment_tree_inherit" model="ir.ui.view">
+        <field name="name">account.batch.payment.tree.inherit</field>
+        <field name="model">account.batch.payment</field>
+        <field name="inherit_id" ref="account_batch_payment.view_batch_payment_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="analytics_plans_batch_id" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--    Code by Kajal-->
+    <record id="account_batch_payment_report_view_pivot" model="ir.ui.view">
+        <field name="name">account.batch.payment.report.pivot</field>
+        <field name="model">account.batch.payment</field>
+        <field name="priority">60</field>
+        <field name="arch" type="xml">
+            <pivot string="Account Batch Payment">
+                <field name="name" type="row"/>
+                <field name="amt_total_value" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+
+    <record id="account_analytic_account_tree_inherit" model="ir.ui.view">
+        <field name="name">account.analytic.account.tree.inherit</field>
+        <field name="model">account.analytic.account</field>
+        <field name="inherit_id" ref="analytic.view_account_analytic_account_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='balance']" position="after">
+                <field name="payments_transfer" optional="hide" sum="payments_transfer"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!--    <record id="view_account_batch_payment_list_bank_rec_widget_inherit" model="ir.ui.view">-->
+    <!--        <field name="name">account.batch.payment.inherit</field>-->
+    <!--        <field name="model">account.batch.payment</field>-->
+    <!--        <field name="inherit_id"-->
+    <!--               ref="account_accountant_batch_payment.view_account_batch_payment_list_bank_rec_widget"/>-->
+    <!--        <field name="arch" type="xml">-->
+    <!--            <xpath expr="//field[@name='amount_residual']" position="after">-->
+    <!--                <field name="ref_bank_no"-->
+    <!--                       string="Bank Reference"-->
+    <!--                       optional="hide"/>-->
+    <!--            </xpath>-->
+    <!--        </field>-->
+    <!--    </record>-->
+
+
+    <record id="account.product_product_menu_sellable" model="ir.ui.menu">
+        <field name="name">Products/Services</field>
+    </record>
+
+    <!--    <record id="model_account_batch_payment_action_validate" model="ir.actions.server">-->
+    <!--        <field name="name">Validate</field>-->
+    <!--        <field name="model_id" ref="account_batch_payment.model_account_batch_payment"/>-->
+    <!--        <field name="binding_model_id" ref="account_batch_payment.model_account_batch_payment"/>-->
+    <!--        <field name="binding_view_types">list</field>-->
+    <!--        <field name="state">code</field>-->
+    <!--        <field name="code">action = records.batch_validate_action()</field>-->
+    <!--    </record>-->
+
+    <!--    <record id="model_account_batch_payment_management_approve" model="ir.actions.server">-->
+    <!--        <field name="name">Management Approval</field>-->
+    <!--        <field name="model_id" ref="account_batch_payment.model_account_batch_payment"/>-->
+    <!--        <field name="binding_model_id" ref="account_batch_payment.model_account_batch_payment"/>-->
+    <!--        <field name="binding_view_types">list</field>-->
+    <!--        <field name="state">code</field>-->
+    <!--        <field name="code">action = records.batch_management_approval()</field>-->
+    <!--    </record>-->
+
+    <!--    <record id="update_bank_ref" model="ir.actions.server">-->
+    <!--        <field name="name">Update Bank Reference</field>-->
+    <!--        <field name="model_id" ref="account_batch_payment.model_account_batch_payment"/>-->
+    <!--        <field name="binding_model_id" ref="account_batch_payment.model_account_batch_payment"/>-->
+    <!--        <field name="groups_id" eval="[(4, ref('csspl_india.group_payments_position_manager'))]"/>-->
+    <!--        <field name="binding_view_types">list</field>-->
+    <!--        <field name="state">code</field>-->
+    <!--        <field name="code">action=records.update_bank_reference()</field>-->
+    <!--    </record>-->
+
+    <!--    <record id="model_account_bank_format_merge" model="ir.actions.server">-->
+    <!--        <field name="name">Bank Format Merge</field>-->
+    <!--        <field name="model_id" ref="account_batch_payment.model_account_batch_payment"/>-->
+    <!--        <field name="binding_model_id" ref="account_batch_payment.model_account_batch_payment"/>-->
+    <!--        <field name="groups_id" eval="[(4, ref('csspl_india.group_payments_position_manager'))]"/>-->
+    <!--        <field name="binding_view_types">list</field>-->
+    <!--        <field name="state">code</field>-->
+    <!--        <field name="code">action=records.generate_excel_merge_report()</field>-->
+    <!--    </record>-->
+
+</odoo>
