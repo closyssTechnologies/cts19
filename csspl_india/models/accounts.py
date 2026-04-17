@@ -311,7 +311,7 @@ class AccountMoveInherit(models.Model):
     def action_post(self):
         res = super(AccountMoveInherit, self).action_post()
         for invoice in self:
-            for line in invoice.line_ids.filtered(lambda l: l.display_type == 'payment_term' and l.move_type in (
+            for line in invoice.invoice_line_ids.filtered(lambda l: l.display_type == 'payment_term' and l.move_type in (
                     'out_invoice', 'out_refund', 'in_invoice', 'in_refund')):
                 if self._origin.move_type == 'out_invoice':
                     if not line.analytic_distribution:
