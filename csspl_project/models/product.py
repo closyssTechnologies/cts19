@@ -3,7 +3,7 @@ from odoo import fields, models, api
 
 class ProductTemplateInherit(models.Model):
     _inherit = 'product.template'
-    _rec_names_search = ['name', 'service_code', 'default_code']
+    _rec_names_search = ['name', 'default_code']
 
     order_type_product = fields.Selection([('civil', 'Civil'), ('electrical', 'Electrical'), ('plumbing', 'Plumbing'),
                                            ('fire_sprinkler', 'Fire Sprinkler'), ('structural', 'Structural')], tracking=True)
