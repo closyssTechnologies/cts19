@@ -12,5 +12,5 @@ class StockPickingInherit(models.Model):
     _inherit = 'stock.picking'
 
     is_outgoing = fields.Boolean()
-    is_ingoing = fields.Boolean()
+    is_incoming = fields.Boolean()
     helpdesk_id = fields.Many2one('helpdesk.ticket')
