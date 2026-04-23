@@ -1,7 +1,7 @@
 from odoo import api, fields, models
 
 
-class HelpdeskTicketInherit(models.model):
+class HelpdeskTicketInherit(models.Model):
     _inherit = 'helpdesk.ticket'
 
     count_outgoing_transfer = fields.Integer(compute="compute_count_of_outgoing")
