@@ -13,3 +13,4 @@ class StockPickingInherit(models.Model):
 
     is_outgoing = fields.Boolean()
     is_ingoing = fields.Boolean()
+    helpdesk_id = fields.Many2one('helpdesk.ticket')

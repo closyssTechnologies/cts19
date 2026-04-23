@@ -19,12 +19,6 @@
                 <field name="count_outgoing_transfer" invisible="1"/>
                 <field name="count_incoming_transfer" invisible="1"/>
             </xpath>
-<!--            <xpath expr="//field[@name='email_cc']" position="after">-->
-<!--                <field name="requester_name"/>-->
-<!--                <field name="project_name"/>-->
-<!--                <field name="receiver_name"/>-->
-<!--                <field name="receiver_no"/>-->
-<!--            </xpath>-->
         </field>
     </record>
 
