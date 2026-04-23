@@ -6,6 +6,11 @@ class HelpdeskTicketInherit(models.Model):
 
     count_outgoing_transfer = fields.Integer(compute="compute_count_of_outgoing")
     count_incoming_transfer = fields.Integer(compute="compute_count_of_incoming")
+    requester_name = fields.Char(string='Requester Name', tracking=1)
+    project_name = fields.Char(string='Project Name', tracking=1)
+    receiver_name = fields.Char(string='Receiver Name', tracking=1)
+    receiver_no = fields.Char(string='Receiver Contact No', tracking=1)
+    type_id = fields.Many2one('helpdesk.type', string='Type', tracking=1)
 
     def action_create_outgoing_transfer(self):
         return {
@@ -109,6 +114,13 @@ class StockWizard(models.TransientModel):
                 'res_id': res.id,
                 'target': 'new',
             }
+
+
+class HelpdeskTypeMaster(models.Model):
+    _name = 'helpdesk.type'
+    _description = "Helpdesk Ticket Type"
+
+    name = fields.Char()
 
 
 

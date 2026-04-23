@@ -19,6 +19,12 @@
                 <field name="count_outgoing_transfer" invisible="1"/>
                 <field name="count_incoming_transfer" invisible="1"/>
             </xpath>
+            <xpath expr="//field[@name='email_cc']" position="after">
+                <field name="requester_name"/>
+                <field name="project_name"/>
+                <field name="receiver_name"/>
+                <field name="receiver_no"/>
+            </xpath>
         </field>
     </record>
 
@@ -42,5 +48,27 @@
             </form>
         </field>
     </record>
+
+    <record id="list_view_helpdesk_type" model="ir.ui.view">
+        <field name="name">list_view_helpdesk_type</field>
+        <field name="model">helpdesk.type</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="create_uid" readonly="1" optional="hide"/>
+                <field name="create_date" readonly="1" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="action_helpdesk_type" model="ir.actions.act_window">
+        <field name="name">Type</field>
+        <field name="res_model">helpdesk.type</field>
+        <field name="view_mode">list</field>
+    </record>
+
+
+    <menuitem id="helpdesk_type_menu_item" name="Types" action="action_helpdesk_type" parent="helpdesk.helpdesk_menu_config"/>
 
 </odoo>
