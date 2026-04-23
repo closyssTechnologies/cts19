@@ -5,7 +5,7 @@
     'sequence': 1,
     "depends": [
         'base','project', 'purchase', 'purchase_stock', 'csspl_india', 'uom', 'approvals','hr_expense',
-                'account', 'analytic','account_accountant', 'hr_timesheet','stock','crm'],
+                'account', 'analytic','account_accountant', 'hr_timesheet','stock','crm','helpdesk'],
     'data': [
         'security/ir.model.access.csv',
         'security/sequence.xml',
@@ -15,6 +15,7 @@
         'wizards/project.xml',
         'wizards/account.xml',
         'views/account.xml',
+        'views/helpdesk.xml',
     ],
     'installable': True,
     'auto_install': False,

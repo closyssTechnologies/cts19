@@ -15,3 +15,4 @@ access_work_order_type,access_work_order_type,model_work_order_type,base.group_u
 access_change_journal,access_change_journal,model_change_journal,base.group_user,1,1,1,1
 access_payment_for_master,access_payment_for_master,model_payment_for_master,base.group_user,1,1,1,1
 access_voucher_account_master,access_voucher_account_master,model_voucher_account_master,base.group_user,1,1,1,1
+access_stock_wizard,access_stock_wizard,model_stock_wizard,base.group_user,1,1,1,1
