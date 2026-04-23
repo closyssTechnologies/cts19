@@ -12,7 +12,7 @@
     'data': [
         'security/ir.model.access.csv',
         'security/security.xml',
-             'views/accounts.xml',
+             # 'views/accounts.xml',
              'views/contact.xml',
              'views/contact_report.xml',
              'views/payment_report.xml',
@@ -32,7 +32,7 @@
              'wizard/import_contact_bank.xml',
              'reports/missing_data.xml',
              'reports/journal_voucher.xml',
-             'views/account.xml',
+             # 'views/account.xml',
              ],
     'website': 'https://planet-odoo.com/',
     'installable': True,

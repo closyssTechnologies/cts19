@@ -71,8 +71,12 @@ class StockWizard(models.TransientModel):
 
     def create_picking(self):
         for rec in self:
-            picking_out = self.env['stock.picking.type'].search([('is_outgoing', '=', True)], limit=1)
-            picking_in = self.env['stock.picking.type'].search([('is_incoming', '=', True)], limit=1)
+            picking_out = self.env['stock.picking.type'].search([('is_outgoing', '=', True),
+                                                                 ('company_id', '=', rec.helpdesk_id.company_id.id)],
+                                                                limit=1)
+            picking_in = self.env['stock.picking.type'].search([('is_incoming', '=', True),
+                                                                ('company_id', '=', rec.helpdesk_id.company_id.id)],
+                                                               limit=1)
             picking_type = picking_out if rec.picking == 'out' else picking_in
             move_lines = []
             for product in rec.product_ids:
@@ -80,7 +84,7 @@ class StockWizard(models.TransientModel):
                     'product_id': product.id,
                     'name': product.name,
                     'product_uom': product.uom_id.id,
-                    'product_uom_qty': 1,  # default quantity (you can change)
+                    'product_uom_qty': 1,
                     'location_id': picking_type.default_location_src_id.id,
                     'location_dest_id': picking_type.default_location_dest_id.id,
                 }))
