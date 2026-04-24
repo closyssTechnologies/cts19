@@ -5,7 +5,7 @@
     'sequence': 1,
     "depends": [
         'base','project', 'purchase', 'purchase_stock', 'csspl_india', 'uom', 'approvals','hr_expense',
-                'account', 'analytic','account_accountant', 'hr_timesheet','stock','crm','helpdesk'],
+                'account', 'analytic','account_accountant', 'hr_timesheet','stock','crm','helpdesk', 'helpdesk_stock'],
     'data': [
         'security/ir.model.access.csv',
         'security/sequence.xml',
