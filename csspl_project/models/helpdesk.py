@@ -99,7 +99,7 @@ class StockWizard(models.TransientModel):
                 'location_id': picking_type.default_location_src_id.id,
                 'location_dest_id': picking_type.default_location_dest_id.id,
                 'helpdesk_id': rec.helpdesk_id.id if rec.helpdesk_id else False,
-                'sale_order_id': rec.sale_id.id if rec.sale_id else False,
+                # 'sale_order_id': rec.sale_id.id if rec.sale_id else False,
                 'move_ids_without_package': move_lines,
                 'is_outgoing': True if rec.picking == 'out' else False,
                 'is_incoming': True if rec.picking == 'in' else False
