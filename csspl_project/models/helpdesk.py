@@ -87,7 +87,7 @@ class StockWizard(models.TransientModel):
             for product in rec.product_ids:
                 move_lines.append((0, 0, {
                     'product_id': product.id,
-                    'name': product.name,
+                    'description_picking': product.name,
                     'product_uom': product.uom_id.id,
                     'product_uom_qty': 1,
                     'location_id': picking_type.default_location_src_id.id,
