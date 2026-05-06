@@ -512,7 +512,7 @@ class AccountBatchPaymentInherit(models.Model):
 
     rej_reason = fields.Text('Reject Reason', tracking=True)
     subject_line = fields.Char('Subject Line')
-    attachment_batch = fields.Binary(string='Mail Attachment', attachment=True, tracking=True)
+    attachment_batch = fields.Binary(string='Mail Attachment', attachment=True)
     working_attachment = fields.Binary(string='Working Attachment', attachment=True, tracking=True)
     pdf_drawing_name = fields.Char(tracking=True)
     pdf_attachment_name = fields.Char(tracking=True)
