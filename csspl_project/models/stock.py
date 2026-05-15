@@ -14,3 +14,19 @@ class StockPickingInherit(models.Model):
     is_outgoing = fields.Boolean()
     is_incoming = fields.Boolean()
     helpdesk_id = fields.Many2one('helpdesk.ticket')
+
+
+class StockMoveInherit(models.Model):
+    _inherit = 'stock.move'
+
+    atm_id = fields.Many2one("atm_id.master", string="Atm ID")
+
+
+class AtmId(models.Model):
+    _name = "atm_id.master"
+    _rec_name = "name"
+
+    name = fields.Char("ATM ID")
+    city = fields.Char("City")
+    address = fields.Char("Address")
+    state = fields.Char("State")
