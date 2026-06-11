@@ -20,6 +20,7 @@ class StockMoveInherit(models.Model):
     _inherit = 'stock.move'
 
     atm_id = fields.Many2one("atm_id.master", string="Atm ID")
+    atm_ids = fields.Many2many("atm_id.master",string="Atm ID",)
 
 
 class AtmId(models.Model):
