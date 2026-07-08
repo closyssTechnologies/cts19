@@ -36,634 +36,640 @@
                     <t t-set="company_bank" t-value="doc.company_id.bank_ids and doc.company_id.bank_ids[0] or False"/>
                     <t t-set="swift_code" t-value="company_bank and company_bank.bank_id.bic or ''"/>
 
-                    <t t-set="hsn_summary" t-value="doc._l10n_in_get_hsn_summary_table() if doc.company_id.account_fiscal_country_id.code == 'IN' else {}"/>
+                    <t t-set="hsn_summary"
+                       t-value="doc._l10n_in_get_hsn_summary_table() if doc.company_id.account_fiscal_country_id.code == 'IN' else {}"/>
                     <t t-set="hsn_items" t-value="hsn_summary.get('items', [])"/>
                     <t t-set="hsn_show_sgst" t-value="bool(hsn_summary.get('has_gst'))"/>
                     <t t-set="hsn_show_cgst" t-value="bool(hsn_summary.get('has_gst'))"/>
                     <t t-set="hsn_show_igst" t-value="bool(hsn_summary.get('has_igst'))"/>
                     <t t-set="hsn_show_cess" t-value="bool(hsn_summary.get('has_cess'))"/>
 
-                    <t t-set="hsn_sgst_total" t-value="sum((item.get('tax_amount_sgst', 0.0) or 0.0) for item in hsn_items)"/>
-                    <t t-set="hsn_cgst_total" t-value="sum((item.get('tax_amount_cgst', 0.0) or 0.0) for item in hsn_items)"/>
-                    <t t-set="hsn_igst_total" t-value="sum((item.get('tax_amount_igst', 0.0) or 0.0) for item in hsn_items)"/>
-                    <t t-set="hsn_cess_total" t-value="sum((item.get('tax_amount_cess', 0.0) or 0.0) for item in hsn_items)"/>
-                    <t t-set="total_tax" t-value="(hsn_sgst_total or 0.0) + (hsn_cgst_total or 0.0) + (hsn_igst_total or 0.0) + (hsn_cess_total or 0.0)"/>
-
-<style>
-/* ============================================================
-   BASE
-   ============================================================ */
-.ex-page {
-    font-family: 'DejaVu Sans', sans-serif;
-    font-size: 10px;
-    color: #000;
-    line-height: 1.30;
-}
-
-.ex-text-left   { text-align: left; }
-.ex-text-center { text-align: center; }
-.ex-text-right  { text-align: right; }
-.ex-v-top { vertical-align: top; }
-.ex-v-mid { vertical-align: middle; }
-.ex-bold  { font-weight: bold; }
-.ex-italic { font-style: italic; }
-
-.ex-font-14 { font-size: 10px; }
-.ex-font-15 { font-size: 11px; }
-.ex-font-16 { font-size: 11px; }
-.ex-font-17 { font-size: 12px; }
-.ex-font-21 { font-size: 17px; }
-
-.ex-mt-2 { margin-top: 2px; }
-.ex-mt-4 { margin-top: 4px; }
-.ex-mt-6 { margin-top: 6px; }
-.ex-mt-8 { margin-top: 8px; }
-
-/* ============================================================
-   GLOBAL TABLE
-   ============================================================ */
-.ex-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.ex-table th,
-.ex-table td {
-    padding: 6px 7px;
-    vertical-align: top;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-    box-sizing: border-box;
-}
-
-/* ============================================================
-   TITLE / HEADER WRAP
-   ============================================================ */
-.ex-top-wrap {
-    width: 100%;
-    margin-bottom: 4px;
-    border: none !important;
-}
-
-.ex-top-wrap table,
-.ex-top-wrap tr,
-.ex-top-wrap td {
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-.ex-top-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.ex-top-table td {
-    padding: 0 !important;
-    vertical-align: top;
-}
-
-.ex-top-left   { width: 30%; }
-.ex-top-center { width: 40%; text-align: center; }
-.ex-top-right  { width: 30%; text-align: right; }
-
-.ex-top-title {
-    font-size: 21px;
-    font-weight: bold;
-    line-height: 1.2;
-    white-space: nowrap;
-}
-
-.ex-top-original {
-    font-size: 12px;
-    font-style: italic;
-    line-height: 1.2;
-    white-space: nowrap;
-    padding-right: 6px;
-}
-
-/* ============================================================
-   SELLER / BUYER SECTION
-   ============================================================ */
-.ex-main-left {
-    width: 53%;
-    vertical-align: top;
-    padding: 8px 10px !important;
-}
-
-.ex-main-right {
-    width: 47%;
-    vertical-align: top;
-    padding: 0 !important;
-}
-
-.ex-company-name,
-.ex-buyer-name {
-    font-size: 11px;
-    font-weight: bold;
-    line-height: 1.28;
-}
-
-.ex-main-left div,
-.ex-main-right div {
-    margin-bottom: 2px;
-}
-
-.ex-label-gap {
-    display: inline-block;
-    min-width: 16px;
-    text-align: center;
-}
-
-.ex-buyer-separator {
-    border-top: 1px solid #000;
-    margin-top: 6px;
-    margin-bottom: 6px;
-    width: calc(100% + 21px);
-    margin-left: -9.5px;
-    margin-right: -10.5px;
-}
-
-/* ============================================================
-   RIGHT INVOICE GRID
-   ============================================================ */
-.ex-right-grid-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    border: none;
-}
-
-.ex-right-grid-table td,
-.ex-right-grid-table th {
-    border: 1px solid #000;
-    padding: 6px 7px;
-    font-size: 12px;
-    line-height: 1.28;
-    vertical-align: top;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-    box-sizing: border-box;
-}
-
-.ex-right-grid-table tr:first-child td,
-.ex-right-grid-table tr:first-child th { border-top: none; }
-
-.ex-right-grid-table td:first-child,
-.ex-right-grid-table th:first-child { border-left: none; }
-
-.ex-right-grid-label {
-    display: block;
-    font-size: 10px;
-    line-height: 1.2;
-    margin-bottom: 2px;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-.ex-right-grid-value {
-    display: block;
-    font-size: 12px;
-    font-weight: bold;
-    line-height: 1.22;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-.ex-right-grid-value-normal {
-    display: block;
-    font-size: 10px;
-    line-height: 1.22;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-/* ============================================================
-   LINE ITEMS TABLE
-   3 columns: sl(5%) | desc(75%) | amt(20%) = 100%
-   ============================================================ */
-.ex-line-table th {
-    text-align: center;
-    font-weight: normal;
-    font-size: 10px;
-    padding: 7px 6px;
-}
-
-.ex-line-table td {
-    font-size: 10px;
-    padding: 7px 6px;
-}
-
-.ex-col-sl   { width: 7%; }
-.ex-col-desc { width: 75%; }
-.ex-col-amt  { width: 20%; }
-
-.ex-desc-cell {
-    padding: 12px 12px 10px 14px !important;
-    min-height: 80px;
-    height: auto !important;
-    line-height: 1.34;
-    white-space: normal !important;
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
-}
-
-.ex-line-product {
-    font-size: 10px;
-    margin-bottom: 4px;
-}
-
-.ex-line-name {
-    font-style: italic;
-    margin-bottom: 2px;
-    line-height: 1.30;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-/* ============================================================
-   TAX INLINE
-   ============================================================ */
-.ex-tax-inline {
-    width: 100%;
-    margin-top: 12px;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.ex-tax-inline td {
-    border: none;
-    padding: 1px 0;
-    font-size: 10px;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-.ex-tax-label { text-align: right; font-weight: bold; padding-right: 16px; }
-.ex-tax-rate  { text-align: center; width: 34px; }
-.ex-tax-pct   { text-align: center; width: 24px; }
-.ex-tax-amt   { text-align: right; width: 110px; font-weight: bold; }
-
-/* ============================================================
-   AMOUNT NOWRAP
-   Single concatenated span = symbol+number never split
-   ============================================================ */
-.ex-amount-nowrap {
-    white-space: nowrap !important;
-    word-break: keep-all !important;
-    overflow-wrap: normal !important;
-}
-
-/* ============================================================
-   UNTAXED / TOTALS TABLE
-   FIX: float:right + overflow:hidden wrapper — NOT margin:auto
-   ============================================================ */
-.ex-untaxed-wrapper {
-    width: 100%;
-    overflow: hidden;  /* clearfix */
-    margin-top: 3%;
-    margin-bottom: 3%;
-}
-
-.ex-untaxed-table {
-    float: right !important;
-    width: 50% !important;
-    border-collapse: collapse;
-    table-layout: fixed;
-    /* margin:auto removed — wkhtmltopdf ignores it */
-}
-
-.ex-untaxed-table td {
-    border: 1px solid #000;
-    padding: 6px 7px;
-    font-size: 10px;
-    line-height: 1.25;
-    vertical-align: middle;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-    box-sizing: border-box;
-}
-
-.ex-untaxed-table td:first-child { width: 60%; }
-.ex-untaxed-table td:last-child  {
-    width: 40%;
-    text-align: right;
-    white-space: nowrap !important;
-    word-break: keep-all !important;
-    overflow-wrap: normal !important;
-}
-
-/* ============================================================
-   AMOUNT WORDS
-   ============================================================ */
-.ex-amount-words td {
-    padding: 7px 8px !important;
-    font-size: 10px;
-}
-
-/* float:right removed from .ex-eoe — use nested table instead */
-.ex-eoe { font-style: italic; }
-
-/* ============================================================
-   BOTTOM BANK / SIGNATURE
-   ============================================================ */
-.ex-export-final-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    margin-top: 0;
-}
-
-.ex-export-final-table td {
-    border: 1px solid #000;
-    vertical-align: top;
-    padding: 6px 8px;
-    box-sizing: border-box;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-.ex-export-final-single {
-    position: relative;
-    min-height: 145px;
-}
-
-.ex-export-pan-line {
-    font-size: 10px;
-    line-height: 1.22;
-    margin-bottom: 4px;
-    width: 56%;
-}
-
-.ex-export-bank-title {
-    font-size: 10px;
-    font-weight: bold;
-    margin-top: 3px;
-    margin-bottom: 2px;
-    width: 56%;
-}
-
-.ex-export-bank-row {
-    font-size: 10px;
-    line-height: 1.18;
-    margin-bottom: 1px;
-    width: 56%;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-.ex-export-sign-simple {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 40%;
-    min-height: 105px;
-    padding: 4px 8px;
-    box-sizing: border-box;
-    border-left: 1px solid #000;
-    border-top: 1px solid #000;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-.ex-export-sign-company {
-    text-align: left;
-    font-size: 10px;
-    font-weight: bold;
-    line-height: 1.18;
-}
-
-.ex-export-sign-gap  { height: 48px; }
-
-.ex-export-sign-text {
-    text-align: right;
-    font-size: 10px;
-    line-height: 1.15;
-}
-
-.ex-footer-note {
-    text-align: center;
-    margin-top: 3px;
-    font-size: 10px;
-    line-height: 1.2;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-/* ============================================================
-   BOTTOM SECTION (ti-* classes)
-   FIX: float:right replaces margin:auto on bank/sign blocks
-   ============================================================ */
-.ti-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.ti-table th,
-.ti-table td {
-    border: 1px solid #000;
-    padding: 6px 7px;
-    vertical-align: top;
-    word-break: break-word;
-    overflow-wrap: break-word;
-}
-
-.ti-bottom-joined-table { margin-top: 0; }
-
-.ti-bottom-joined-cell {
-    padding: 8px 8px 4px 8px;
-    border-top: none;
-}
-
-.ti-tax-words-line {
-    font-size: 10px;
-    line-height: 1.28;
-    margin-top: 0;
-    margin-bottom: 6px;
-}
-
-.ti-tax-words-label { display: inline-block; }
-
-.ti-tax-words-colon {
-    display: inline-block;
-    width: 16px;
-    text-align: center;
-}
-
-.ti-tax-words-value {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-/* FIX: float:right — margin:auto ignored by wkhtmltopdf */
-.ti-bottom-bank-outside {
-    float: right;
-    width: 54%;
-    margin-top: 5%;
-    font-size: 10px;
-    line-height: 1.22;
-    padding-right: 6px;
-    box-sizing: border-box;
-}
-
-.ti-bank-title {
-    text-align: left;
-    font-size: 10px;
-    font-weight: bold;
-    margin-bottom: 2px;
-}
-
-.ti-bank-row {
-    margin-bottom: 1px;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-.ti-bank-label {
-    display: inline-block;
-    width: 150px;
-}
-
-.ti-bank-colon {
-    display: inline-block;
-    width: 16px;
-    text-align: center;
-}
-
-.ti-bank-value {
-    display: inline-block;
-    font-weight: bold;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-/* FIX: float:right + clear:right */
-.ti-company-sign-wrap {
-    float: right;
-    width: 54%;
-    margin-top: 2px;
-    padding-top: 0;
-    border-left: 1px solid #000;
-    border-top: 1px solid #000;
-    box-sizing: border-box;
-    clear: right;
-}
-
-.ti-company-line {
-    text-align: left;
-    font-size: 10px;
-    font-weight: bold;
-    line-height: 1.22;
-    padding-top: 2px;
-}
-
-.ti-sign-space { height: 44px; }
-
-.ti-sign-row-only {
-    width: 100%;
-    display: table;
-    table-layout: fixed;
-}
-
-.ti-sign-row-only .ti-sign-right {
-    display: table-cell;
-    text-align: right;
-    vertical-align: bottom;
-    font-size: 10px;
-    line-height: 1.2;
-    padding-right: 8px;
-}
-
-.ti-pan-outside-line {
-    margin-top: -18px;
-    padding-left: 8px;
-    font-size: 10px;
-    line-height: 1.2;
-    clear: both;
-}
-
-.ti-pan-label {
-    display: inline-block;
-    min-width: 170px;
-}
-
-.ti-pan-colon {
-    display: inline-block;
-    width: 16px;
-    text-align: center;
-}
-
-.ti-pan-value {
-    display: inline-block;
-    font-weight: bold;
-    font-size: 11px;
-}
-
-/* ============================================================
-   PDF SAFETY OVERRIDES
-   ============================================================ */
-.ex-table, .ex-right-grid-table, .ex-line-table,
-.ex-untaxed-table, .ex-export-final-table, .ti-table {
-    table-layout: fixed !important;
-}
-
-.ex-table th, .ex-table td,
-.ex-right-grid-table th, .ex-right-grid-table td,
-.ex-line-table th, .ex-line-table td,
-.ex-untaxed-table th, .ex-untaxed-table td,
-.ex-export-final-table th, .ex-export-final-table td,
-.ti-table th, .ti-table td {
-    white-space: normal !important;
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
-    box-sizing: border-box !important;
-}
-
-.ex-line-table tr,
-.ex-right-grid-table tr,
-.ex-untaxed-table tr,
-.ex-export-final-table tr,
-.ti-table tr {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-}
-
-.ex-untaxed-wrapper {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    overflow: hidden !important;
-}
-
-.ex-main-left,
-.ex-main-right {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-}
-
-.ex-amount-nowrap {
-    white-space: nowrap !important;
-    word-break: keep-all !important;
-    overflow-wrap: normal !important;
-}
-</style>
+                    <t t-set="hsn_sgst_total"
+                       t-value="sum((item.get('tax_amount_sgst', 0.0) or 0.0) for item in hsn_items)"/>
+                    <t t-set="hsn_cgst_total"
+                       t-value="sum((item.get('tax_amount_cgst', 0.0) or 0.0) for item in hsn_items)"/>
+                    <t t-set="hsn_igst_total"
+                       t-value="sum((item.get('tax_amount_igst', 0.0) or 0.0) for item in hsn_items)"/>
+                    <t t-set="hsn_cess_total"
+                       t-value="sum((item.get('tax_amount_cess', 0.0) or 0.0) for item in hsn_items)"/>
+                    <t t-set="total_tax"
+                       t-value="(hsn_sgst_total or 0.0) + (hsn_cgst_total or 0.0) + (hsn_igst_total or 0.0) + (hsn_cess_total or 0.0)"/>
+
+                    <style>
+                        /* ============================================================
+                        BASE
+                        ============================================================ */
+                        .ex-page {
+                        font-family: 'DejaVu Sans', sans-serif;
+                        font-size: 10px;
+                        color: #000;
+                        line-height: 1.30;
+                        }
+
+                        .ex-text-left { text-align: left; }
+                        .ex-text-center { text-align: center; }
+                        .ex-text-right { text-align: right; }
+                        .ex-v-top { vertical-align: top; }
+                        .ex-v-mid { vertical-align: middle; }
+                        .ex-bold { font-weight: bold; }
+                        .ex-italic { font-style: italic; }
+
+                        .ex-font-14 { font-size: 10px; }
+                        .ex-font-15 { font-size: 11px; }
+                        .ex-font-16 { font-size: 11px; }
+                        .ex-font-17 { font-size: 12px; }
+                        .ex-font-21 { font-size: 17px; }
+
+                        .ex-mt-2 { margin-top: 2px; }
+                        .ex-mt-4 { margin-top: 4px; }
+                        .ex-mt-6 { margin-top: 6px; }
+                        .ex-mt-8 { margin-top: 8px; }
+
+                        /* ============================================================
+                        GLOBAL TABLE
+                        ============================================================ */
+                        .ex-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                        }
+
+                        .ex-table th,
+                        .ex-table td {
+                        padding: 6px 7px;
+                        vertical-align: top;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        box-sizing: border-box;
+                        }
+
+                        /* ============================================================
+                        TITLE / HEADER WRAP
+                        ============================================================ */
+                        .ex-top-wrap {
+                        width: 100%;
+                        margin-bottom: 4px;
+                        border: none !important;
+                        }
+
+                        .ex-top-wrap table,
+                        .ex-top-wrap tr,
+                        .ex-top-wrap td {
+                        border: none !important;
+                        outline: none !important;
+                        box-shadow: none !important;
+                        }
+
+                        .ex-top-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                        }
+
+                        .ex-top-table td {
+                        padding: 0 !important;
+                        vertical-align: top;
+                        }
+
+                        .ex-top-left { width: 30%; }
+                        .ex-top-center { width: 40%; text-align: center; }
+                        .ex-top-right { width: 30%; text-align: right; }
+
+                        .ex-top-title {
+                        font-size: 21px;
+                        font-weight: bold;
+                        line-height: 1.2;
+                        white-space: nowrap;
+                        }
+
+                        .ex-top-original {
+                        font-size: 12px;
+                        font-style: italic;
+                        line-height: 1.2;
+                        white-space: nowrap;
+                        padding-right: 6px;
+                        }
+
+                        /* ============================================================
+                        SELLER / BUYER SECTION
+                        ============================================================ */
+                        .ex-main-left {
+                        width: 53%;
+                        vertical-align: top;
+                        padding: 8px 10px !important;
+                        }
+
+                        .ex-main-right {
+                        width: 47%;
+                        vertical-align: top;
+                        padding: 0 !important;
+                        }
+
+                        .ex-company-name,
+                        .ex-buyer-name {
+                        font-size: 11px;
+                        font-weight: bold;
+                        line-height: 1.28;
+                        }
+
+                        .ex-main-left div,
+                        .ex-main-right div {
+                        margin-bottom: 2px;
+                        }
+
+                        .ex-label-gap {
+                        display: inline-block;
+                        min-width: 16px;
+                        text-align: center;
+                        }
+
+                        .ex-buyer-separator {
+                        border-top: 1px solid #000;
+                        margin-top: 6px;
+                        margin-bottom: 6px;
+                        width: calc(100% + 21px);
+                        margin-left: -9.5px;
+                        margin-right: -10.5px;
+                        }
+
+                        /* ============================================================
+                        RIGHT INVOICE GRID
+                        ============================================================ */
+                        .ex-right-grid-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                        border: none;
+                        }
+
+                        .ex-right-grid-table td,
+                        .ex-right-grid-table th {
+                        border: 1px solid #000;
+                        padding: 6px 7px;
+                        font-size: 12px;
+                        line-height: 1.28;
+                        vertical-align: top;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        box-sizing: border-box;
+                        }
+
+                        .ex-right-grid-table tr:first-child td,
+                        .ex-right-grid-table tr:first-child th { border-top: none; }
+
+                        .ex-right-grid-table td:first-child,
+                        .ex-right-grid-table th:first-child { border-left: none; }
+
+                        .ex-right-grid-label {
+                        display: block;
+                        font-size: 10px;
+                        line-height: 1.2;
+                        margin-bottom: 2px;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        }
+
+                        .ex-right-grid-value {
+                        display: block;
+                        font-size: 12px;
+                        font-weight: bold;
+                        line-height: 1.22;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        }
+
+                        .ex-right-grid-value-normal {
+                        display: block;
+                        font-size: 10px;
+                        line-height: 1.22;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        }
+
+                        /* ============================================================
+                        LINE ITEMS TABLE
+                        3 columns: sl(5%) | desc(75%) | amt(20%) = 100%
+                        ============================================================ */
+                        .ex-line-table th {
+                        text-align: center;
+                        font-weight: normal;
+                        font-size: 10px;
+                        padding: 7px 6px;
+                        }
+
+                        .ex-line-table td {
+                        font-size: 10px;
+                        padding: 7px 6px;
+                        }
+
+                        .ex-col-sl { width: 7%; }
+                        .ex-col-desc { width: 75%; }
+                        .ex-col-amt { width: 20%; }
+
+                        .ex-desc-cell {
+                        padding: 12px 12px 10px 14px !important;
+                        min-height: 80px;
+                        height: auto !important;
+                        line-height: 1.34;
+                        white-space: normal !important;
+                        word-break: break-word !important;
+                        overflow-wrap: anywhere !important;
+                        }
+
+                        .ex-line-product {
+                        font-size: 10px;
+                        margin-bottom: 4px;
+                        }
+
+                        .ex-line-name {
+                        font-style: italic;
+                        margin-bottom: 2px;
+                        line-height: 1.30;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        }
+
+                        /* ============================================================
+                        TAX INLINE
+                        ============================================================ */
+                        .ex-tax-inline {
+                        width: 100%;
+                        margin-top: 12px;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                        }
+
+                        .ex-tax-inline td {
+                        border: none;
+                        padding: 1px 0;
+                        font-size: 10px;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        }
+
+                        .ex-tax-label { text-align: right; font-weight: bold; padding-right: 16px; }
+                        .ex-tax-rate { text-align: center; width: 34px; }
+                        .ex-tax-pct { text-align: center; width: 24px; }
+                        .ex-tax-amt { text-align: right; width: 110px; font-weight: bold; }
+
+                        /* ============================================================
+                        AMOUNT NOWRAP
+                        Single concatenated span = symbol+number never split
+                        ============================================================ */
+                        .ex-amount-nowrap {
+                        white-space: nowrap !important;
+                        word-break: keep-all !important;
+                        overflow-wrap: normal !important;
+                        }
+
+                        /* ============================================================
+                        UNTAXED / TOTALS TABLE
+                        FIX: float:right + overflow:hidden wrapper — NOT margin:auto
+                        ============================================================ */
+                        .ex-untaxed-wrapper {
+                        width: 100%;
+                        overflow: hidden; /* clearfix */
+                        margin-top: 3%;
+                        margin-bottom: 3%;
+                        }
+
+                        .ex-untaxed-table {
+                        float: right !important;
+                        width: 50% !important;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                        /* margin:auto removed — wkhtmltopdf ignores it */
+                        }
+
+                        .ex-untaxed-table td {
+                        border: 1px solid #000;
+                        padding: 6px 7px;
+                        font-size: 10px;
+                        line-height: 1.25;
+                        vertical-align: middle;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        box-sizing: border-box;
+                        }
+
+                        .ex-untaxed-table td:first-child { width: 60%; }
+                        .ex-untaxed-table td:last-child {
+                        width: 40%;
+                        text-align: right;
+                        white-space: nowrap !important;
+                        word-break: keep-all !important;
+                        overflow-wrap: normal !important;
+                        }
+
+                        /* ============================================================
+                        AMOUNT WORDS
+                        ============================================================ */
+                        .ex-amount-words td {
+                        padding: 7px 8px !important;
+                        font-size: 10px;
+                        }
+
+                        /* float:right removed from .ex-eoe — use nested table instead */
+                        .ex-eoe { font-style: italic; }
+
+                        /* ============================================================
+                        BOTTOM BANK / SIGNATURE
+                        ============================================================ */
+                        .ex-export-final-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                        margin-top: 0;
+                        }
+
+                        .ex-export-final-table td {
+                        border: 1px solid #000;
+                        vertical-align: top;
+                        padding: 6px 8px;
+                        box-sizing: border-box;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        }
+
+                        .ex-export-final-single {
+                        position: relative;
+                        min-height: 145px;
+                        }
+
+                        .ex-export-pan-line {
+                        font-size: 10px;
+                        line-height: 1.22;
+                        margin-bottom: 4px;
+                        width: 56%;
+                        }
+
+                        .ex-export-bank-title {
+                        font-size: 10px;
+                        font-weight: bold;
+                        margin-top: 3px;
+                        margin-bottom: 2px;
+                        width: 56%;
+                        }
+
+                        .ex-export-bank-row {
+                        font-size: 10px;
+                        line-height: 1.18;
+                        margin-bottom: 1px;
+                        width: 56%;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        }
+
+                        .ex-export-sign-simple {
+                        position: absolute;
+                        right: 0;
+                        bottom: 0;
+                        width: 40%;
+                        min-height: 105px;
+                        padding: 4px 8px;
+                        box-sizing: border-box;
+                        border-left: 1px solid #000;
+                        border-top: 1px solid #000;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        }
+
+                        .ex-export-sign-company {
+                        text-align: left;
+                        font-size: 10px;
+                        font-weight: bold;
+                        line-height: 1.18;
+                        }
+
+                        .ex-export-sign-gap { height: 48px; }
+
+                        .ex-export-sign-text {
+                        text-align: right;
+                        font-size: 10px;
+                        line-height: 1.15;
+                        }
+
+                        .ex-footer-note {
+                        text-align: center;
+                        margin-top: 3px;
+                        font-size: 10px;
+                        line-height: 1.2;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        }
+
+                        /* ============================================================
+                        BOTTOM SECTION (ti-* classes)
+                        FIX: float:right replaces margin:auto on bank/sign blocks
+                        ============================================================ */
+                        .ti-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                        }
+
+                        .ti-table th,
+                        .ti-table td {
+                        border: 1px solid #000;
+                        padding: 6px 7px;
+                        vertical-align: top;
+                        word-break: break-word;
+                        overflow-wrap: break-word;
+                        }
+
+                        .ti-bottom-joined-table { margin-top: 0; }
+
+                        .ti-bottom-joined-cell {
+                        padding: 8px 8px 4px 8px;
+                        border-top: none;
+                        }
+
+                        .ti-tax-words-line {
+                        font-size: 10px;
+                        line-height: 1.28;
+                        margin-top: 0;
+                        margin-bottom: 6px;
+                        }
+
+                        .ti-tax-words-label { display: inline-block; }
+
+                        .ti-tax-words-colon {
+                        display: inline-block;
+                        width: 16px;
+                        text-align: center;
+                        }
+
+                        .ti-tax-words-value {
+                        display: inline-block;
+                        font-size: 12px;
+                        font-weight: bold;
+                        }
+
+                        /* FIX: float:right — margin:auto ignored by wkhtmltopdf */
+                        .ti-bottom-bank-outside {
+                        float: right;
+                        width: 54%;
+                        margin-top: 5%;
+                        font-size: 10px;
+                        line-height: 1.22;
+                        padding-right: 6px;
+                        box-sizing: border-box;
+                        }
+
+                        .ti-bank-title {
+                        text-align: left;
+                        font-size: 10px;
+                        font-weight: bold;
+                        margin-bottom: 2px;
+                        }
+
+                        .ti-bank-row {
+                        margin-bottom: 1px;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        }
+
+                        .ti-bank-label {
+                        display: inline-block;
+                        width: 150px;
+                        }
+
+                        .ti-bank-colon {
+                        display: inline-block;
+                        width: 16px;
+                        text-align: center;
+                        }
+
+                        .ti-bank-value {
+                        display: inline-block;
+                        font-weight: bold;
+                        white-space: normal;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                        }
+
+                        /* FIX: float:right + clear:right */
+                        .ti-company-sign-wrap {
+                        float: right;
+                        width: 54%;
+                        margin-top: 2px;
+                        padding-top: 0;
+                        border-left: 1px solid #000;
+                        border-top: 1px solid #000;
+                        box-sizing: border-box;
+                        clear: right;
+                        }
+
+                        .ti-company-line {
+                        text-align: left;
+                        font-size: 10px;
+                        font-weight: bold;
+                        line-height: 1.22;
+                        padding-top: 2px;
+                        }
+
+                        .ti-sign-space { height: 44px; }
+
+                        .ti-sign-row-only {
+                        width: 100%;
+                        display: table;
+                        table-layout: fixed;
+                        }
+
+                        .ti-sign-row-only .ti-sign-right {
+                        display: table-cell;
+                        text-align: right;
+                        vertical-align: bottom;
+                        font-size: 10px;
+                        line-height: 1.2;
+                        padding-right: 8px;
+                        }
+
+                        .ti-pan-outside-line {
+                        margin-top: -18px;
+                        padding-left: 8px;
+                        font-size: 10px;
+                        line-height: 1.2;
+                        clear: both;
+                        }
+
+                        .ti-pan-label {
+                        display: inline-block;
+                        min-width: 170px;
+                        }
+
+                        .ti-pan-colon {
+                        display: inline-block;
+                        width: 16px;
+                        text-align: center;
+                        }
+
+                        .ti-pan-value {
+                        display: inline-block;
+                        font-weight: bold;
+                        font-size: 11px;
+                        }
+
+                        /* ============================================================
+                        PDF SAFETY OVERRIDES
+                        ============================================================ */
+                        .ex-table, .ex-right-grid-table, .ex-line-table,
+                        .ex-untaxed-table, .ex-export-final-table, .ti-table {
+                        table-layout: fixed !important;
+                        }
+
+                        .ex-table th, .ex-table td,
+                        .ex-right-grid-table th, .ex-right-grid-table td,
+                        .ex-line-table th, .ex-line-table td,
+                        .ex-untaxed-table th, .ex-untaxed-table td,
+                        .ex-export-final-table th, .ex-export-final-table td,
+                        .ti-table th, .ti-table td {
+                        white-space: normal !important;
+                        word-break: break-word !important;
+                        overflow-wrap: anywhere !important;
+                        box-sizing: border-box !important;
+                        }
+
+                        .ex-line-table tr,
+                        .ex-right-grid-table tr,
+                        .ex-untaxed-table tr,
+                        .ex-export-final-table tr,
+                        .ti-table tr {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                        }
+
+                        .ex-untaxed-wrapper {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                        overflow: hidden !important;
+                        }
+
+                        .ex-main-left,
+                        .ex-main-right {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                        }
+
+                        .ex-amount-nowrap {
+                        white-space: nowrap !important;
+                        word-break: keep-all !important;
+                        overflow-wrap: normal !important;
+                        }
+                    </style>
 
                     <div class="page ex-page">
 
@@ -700,16 +706,19 @@
                                             <span t-esc="doc.company_id.partner_id.city"/>
                                         </t>
                                         <t t-if="doc.company_id.partner_id.zip">
-                                            - <span t-esc="doc.company_id.partner_id.zip"/>
+                                            -
+                                            <span t-esc="doc.company_id.partner_id.zip"/>
                                         </t>
                                     </div>
 
                                     <div class="ex-font-14">
-                                        VAT : <span t-esc="doc.company_id.vat"/>
+                                        VAT :
+                                        <span t-esc="doc.company_id.vat"/>
                                     </div>
 
                                     <div class="ex-font-14">
-                                        E-Mail : <span t-esc="doc.company_id.email or ''"/>
+                                        E-Mail :
+                                        <span t-esc="doc.company_id.email or ''"/>
                                     </div>
 
                                     <div class="ex-buyer-separator"/>
@@ -741,11 +750,13 @@
                                     </div>
 
                                     <div class="ex-font-14">
-                                        VAT Registration No: <span t-esc="doc.partner_id.vat or ''"/>
+                                        VAT Registration No:
+                                        <span t-esc="doc.partner_id.vat or ''"/>
                                     </div>
 
                                     <div class="ex-font-14">
-                                        Attn: <span t-esc="doc.partner_id.name"/>
+                                        Attn:
+                                        <span t-esc="doc.partner_id.name"/>
                                     </div>
                                 </td>
 
@@ -758,7 +769,8 @@
                                             </td>
                                             <td class="ex-v-top">
                                                 <span class="ex-right-grid-label">Dated</span>
-                                                <span class="ex-right-grid-value" t-esc="doc.invoice_date" t-options="{'widget': 'date'}"/>
+                                                <span class="ex-right-grid-value" t-esc="doc.invoice_date"
+                                                      t-options="{'widget': 'date'}"/>
                                             </td>
                                         </tr>
                                         <tr>
@@ -774,11 +786,13 @@
                                         <tr>
                                             <td class="ex-v-top">
                                                 <span class="ex-right-grid-label">Buyer's Order No.</span>
-                                                <span class="ex-right-grid-value-normal" t-esc="doc.invoice_origin or ''"/>
+                                                <span class="ex-right-grid-value-normal"
+                                                      t-esc="doc.invoice_origin or ''"/>
                                             </td>
                                             <td class="ex-v-top">
                                                 <span class="ex-right-grid-label">Dated</span>
-                                                <span class="ex-right-grid-value-normal" t-esc="doc.invoice_date" t-options="{'widget': 'date'}"/>
+                                                <span class="ex-right-grid-value-normal" t-esc="doc.invoice_date"
+                                                      t-options="{'widget': 'date'}"/>
                                             </td>
                                         </tr>
                                     </table>
@@ -878,7 +892,9 @@
                                 </tr>
 
                                 <tr>
-                                    <td><strong>Total:</strong></td>
+                                    <td>
+                                        <strong>Total:</strong>
+                                    </td>
                                     <td class="ex-text-right ex-bold ex-amount-nowrap">
                                         <span t-esc="(doc.currency_id.symbol or '') + ' ' + '{:,.2f}'.format(doc.amount_total or 0.0)"/>
                                     </td>
@@ -892,7 +908,9 @@
                                 </tr>
 
                                 <tr>
-                                    <td><strong>Balance Due:</strong></td>
+                                    <td>
+                                        <strong>Balance Due:</strong>
+                                    </td>
                                     <td class="ex-text-right ex-bold ex-amount-nowrap">
                                         <span t-esc="(doc.currency_id.symbol or '') + ' ' + '{:,.2f}'.format(doc.amount_residual or 0.0)"/>
                                     </td>
@@ -919,12 +937,15 @@
                                             </td>
                                             <td style="border:none; padding:0; text-align:right; vertical-align:top; width:30%; white-space:nowrap; word-break:keep-all; overflow-wrap:normal;">
                                                 <!-- &#160; = non-breaking space: E. & O.E will never split -->
-                                                <span style="font-style:italic; white-space:nowrap; word-break:keep-all;">E. &amp; O.E</span>
+                                                <span style="font-style:italic; white-space:nowrap; word-break:keep-all;">
+                                                    E. &amp; O.E
+                                                </span>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td colspan="2" style="border:none; padding:0; padding-top:4px;">
-                                                <span style="font-size:11px; font-weight:bold; line-height:1.18;" t-esc="doc.currency_id.amount_to_text(doc.amount_total)"/>
+                                                <span style="font-size:11px; font-weight:bold; line-height:1.18;"
+                                                      t-esc="doc.currency_id.amount_to_text(doc.amount_total)"/>
                                             </td>
                                         </tr>
                                     </table>
@@ -954,7 +975,8 @@
                                         <div class="ti-bank-row">
                                             <span class="ti-bank-label">Branch &amp; Bank Code</span>
                                             <span class="ti-bank-colon">:</span>
-                                            <span class="ti-bank-value" t-esc="(doc.partner_bank_id.bank_id.street or '') + ' ' + (doc.partner_bank_id.bank_id.bic or '')"/>
+                                            <span class="ti-bank-value"
+                                                  t-esc="(doc.partner_bank_id.bank_id.street or '') + ' ' + (doc.partner_bank_id.bank_id.bic or '')"/>
                                         </div>
 
                                         <div class="ti-bank-row">
@@ -965,17 +987,18 @@
                                     </div>
 
 
-                       <!-- Signatory: left+top border only, stuck to bottom-right -->
+                                    <!-- Signatory: left+top border only, stuck to bottom-right -->
                                     <div style="float:right; width:54%; border-left:1px solid #000; border-top:1px solid #000; min-height:90px; padding:4px 8px 4px 8px; box-sizing:border-box;">
-    <div style="font-size:10px; font-weight:bold; line-height:1.22;">
-        for <span t-esc="doc.company_id.partner_id.legal_name"/>
-    </div>
-    <div style="height:70px;"/>
-    <div style="text-align:right; font-size:10px; line-height:1.2; padding-right:0;">
-        Authorised Signatory
-    </div>
-</div>
-            <div style="clear:both;"/>
+                                        <div style="font-size:10px; font-weight:bold; line-height:1.22;">
+                                            for
+                                            <span t-esc="doc.company_id.partner_id.legal_name"/>
+                                        </div>
+                                        <div style="height:70px;"/>
+                                        <div style="text-align:right; font-size:10px; line-height:1.2; padding-right:0;">
+                                            Authorised Signatory
+                                        </div>
+                                    </div>
+                                    <div style="clear:both;"/>
 
                                 </td>
                             </tr>

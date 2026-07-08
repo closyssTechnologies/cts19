@@ -37,17 +37,16 @@
             <meta charset="utf-8"/>
             <t t-foreach="docs" t-as="o">
 
-
                      <div class="page" style="margin-top:90px;position:relative;">
                       <t t-if="o.company_id.logo">
-    <img t-att-src="image_data_uri(o.company_id.logo)"
-         style="max-width:120px; max-height:80px; margin-bottom:18px;"/>
-</t>
-<t t-else="">
-    <div style="border:1px solid black; width:100px; height:70px; margin-bottom:18px; text-align:center; line-height:70px;">
-        No Logo
-    </div>
-</t>
+                <img t-att-src="image_data_uri(o.company_id.logo)"
+                     style="max-width:120px; max-height:80px; margin-bottom:18px;"/>
+                    </t>
+                    <t t-else="">
+                        <div style="border:1px solid black; width:100px; height:70px; margin-bottom:18px; text-align:center; line-height:70px;">
+                            No Logo
+                        </div>
+                    </t>
 
 
                      <table style="width:100%; border:1px solid black; border-collapse:collapse; font-size:15px;">

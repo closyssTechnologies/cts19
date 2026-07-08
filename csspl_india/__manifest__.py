@@ -7,7 +7,7 @@
     'category': 'Productivity',
     'website': 'https://www.odoomates.tech',
     'depends': ['base', 'account', 'account_reports', 'accountant', 'account_batch_payment', 'purchase', 'analytic',
-                'contacts', 'account_followup', 'account_accountant_batch_payment'],
+                'contacts', 'account_followup', 'account_accountant_batch_payment', 'report_xlsx'],
     'license': 'LGPL-3',
     'application': True,
     'data': [
@@ -35,6 +35,7 @@
         'reports/journal_voucher.xml',
         'views/account.xml',
         'views/res_partner.xml',
+        'reports/purchase_order.xml',
     ],
     'website': 'https://planet-odoo.com/',
     'installable': True,
