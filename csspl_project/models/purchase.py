@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError
 class PurchaseOrderInherit(models.Model):
     _inherit = 'purchase.order'
 
+
     analytic_distribution = fields.Many2one(
         'account.analytic.account',
         string='Analytic Distribution',
