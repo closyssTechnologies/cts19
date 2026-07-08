@@ -1,0 +1,1001 @@
+<t t-name="customization.estimate_invoice_report_document">
+            <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="customization.css_export_invoice_report_layout">
+
+                    <t t-set="hsn_summary" t-value="doc._l10n_in_get_hsn_summary_table() if doc.company_id.account_fiscal_country_id.code == 'IN' else {}"/>
+                    <t t-set="hsn_items" t-value="hsn_summary.get('items', [])"/>
+                    <t t-set="hsn_show_sgst" t-value="bool(hsn_summary.get('has_gst'))"/>
+                    <t t-set="hsn_show_cgst" t-value="bool(hsn_summary.get('has_gst'))"/>
+                    <t t-set="hsn_show_igst" t-value="bool(hsn_summary.get('has_igst'))"/>
+                    <t t-set="hsn_show_cess" t-value="bool(hsn_summary.get('has_cess'))"/>
+
+                    <t t-set="hsn_sgst_total" t-value="sum((item.get('tax_amount_sgst', 0.0) or 0.0) for item in hsn_items)"/>
+                    <t t-set="hsn_cgst_total" t-value="sum((item.get('tax_amount_cgst', 0.0) or 0.0) for item in hsn_items)"/>
+                    <t t-set="hsn_igst_total" t-value="sum((item.get('tax_amount_igst', 0.0) or 0.0) for item in hsn_items)"/>
+                    <t t-set="hsn_cess_total" t-value="sum((item.get('tax_amount_cess', 0.0) or 0.0) for item in hsn_items)"/>
+                    <t t-set="total_tax" t-value="(hsn_sgst_total or 0.0) + (hsn_cgst_total or 0.0) + (hsn_igst_total or 0.0) + (hsn_cess_total or 0.0)"/>
+
+<style>
+    .ex-page {
+        font-family: 'DejaVu Sans', sans-serif;
+        font-size: 11px;
+        color: #000;
+        line-height: 1.30;
+    }
+
+    .ex-text-left { text-align: left; }
+    .ex-text-center { text-align: center; }
+    .ex-text-right { text-align: right; }
+    .ex-v-top { vertical-align: top; }
+    .ex-v-mid { vertical-align: middle; }
+    .ex-bold { font-weight: bold; }
+    .ex-italic { font-style: italic; }
+
+    .ex-font-14 { font-size: 11px; }
+    .ex-font-15 { font-size: 12px; }
+    .ex-font-16 { font-size: 12px; }
+    .ex-font-17 { font-size: 13px; }
+    .ex-font-21 { font-size: 18px; }
+
+    .ex-mt-2 { margin-top: 2px; }
+    .ex-mt-4 { margin-top: 4px; }
+    .ex-mt-6 { margin-top: 6px; }
+    .ex-mt-8 { margin-top: 8px; }
+
+    .ex-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .ex-table th,
+    .ex-table td {
+<!--        border: 1px solid #000;-->
+        padding: 6px 7px;
+        vertical-align: top;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        box-sizing: border-box;
+    }
+.ex-top-wrap {
+    width: 100%;
+    margin-bottom: 4px;
+    border: none !important;
+}
+
+.ex-top-wrap table,
+.ex-top-wrap tr,
+.ex-top-wrap td {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.ex-top-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.ex-top-table td {
+    padding: 0 !important;
+    vertical-align: top;
+}
+
+.ex-top-left {
+    width: 30%;
+}
+
+.ex-top-center {
+    width: 40%;
+    text-align: center;
+}
+
+.ex-top-right {
+    width: 30%;
+    text-align: right;
+}
+
+.ex-top-title {
+    font-size: 17px;
+    font-weight: bold;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.ex-top-original {
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.2;
+    white-space: nowrap;
+    padding-right: 6px;
+}
+
+    .ex-main-left {
+        width: 53%;
+        vertical-align: top;
+        padding: 8px 10px !important;
+    }
+
+    .ex-main-right {
+        width: 47%;
+        vertical-align: top;
+        padding: 0 !important;
+    }
+
+    .ex-company-name,
+    .ex-buyer-name {
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 1.28;
+    }
+
+    .ex-main-left div,
+    .ex-main-right div {
+        margin-bottom: 2px;
+    }
+
+    .ex-label-gap {
+        display: inline-block;
+        min-width: 16px;
+        text-align: center;
+    }
+
+    .ex-buyer-separator {
+        border-top: 1px solid #000;
+        margin-top: 6px;
+        margin-bottom: 6px;
+        width: calc(100% + 21px);
+        margin-left: -9.5px;
+        margin-right: -10.5px;
+    }
+
+    .ex-right-grid-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        border: none;
+    }
+
+    .ex-right-grid-table td,
+    .ex-right-grid-table th {
+        border: 1px solid #000;
+        padding: 6px 7px;
+        font-size: 11px;
+        line-height: 1.28;
+        vertical-align: top;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        box-sizing: border-box;
+    }
+
+    .ex-right-grid-table tr:first-child td,
+    .ex-right-grid-table tr:first-child th {
+        border-top: none;
+    }
+
+    .ex-right-grid-table td:first-child,
+    .ex-right-grid-table th:first-child {
+        border-left: none;
+    }
+
+    .ex-right-grid-label {
+        display: block;
+        font-size: 11px;
+        line-height: 1.2;
+        margin-bottom: 2px;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-right-grid-value {
+        display: block;
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 1.22;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-right-grid-value-normal {
+        display: block;
+        font-size: 11px;
+        line-height: 1.22;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-line-table th {
+        text-align: center;
+        font-weight: normal;
+        font-size: 11px;
+        padding: 7px 6px;
+    }
+
+    .ex-line-table td {
+        font-size: 11px;
+        padding: 7px 6px;
+    }
+.ex-col-sl   { width: 4%; }
+.ex-col-desc { width: 49%; }
+.ex-col-hsn  { width: 9%; }
+.ex-col-gst  { width: 9%; }
+.ex-col-rate { width: 10%; }
+.ex-col-per  { width: 6%; }
+.ex-col-amt  { width: 13%; }
+
+
+/* AMOUNT SAFETY: keep currency symbol + amount in one line */
+.ex-amount-nowrap,
+.ex-line-table td.ex-amount-nowrap,
+.ex-untaxed-table td.ex-amount-nowrap {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+}
+
+/* FIX: prevent symbol/amount line breaks on all right-aligned cells */
+.ex-text-right {
+    white-space: nowrap !important;
+}
+
+.ex-table td span + span,
+.ex-line-table td span + span,
+.ex-untaxed-table td span + span {
+    display: inline;
+}
+
+/* FIX: smaller font for large numbers in amount columns */
+.ex-col-amt,
+.ex-line-table td.ex-col-amt,
+.ex-line-table td.ex-amount-nowrap,
+.ex-line-table th.ex-amount-nowrap,
+.ex-untaxed-table td:last-child {
+    font-size: 11px !important;
+}
+
+
+    .ex-desc-cell {
+        padding: 12px 12px 10px 14px !important;
+        min-height: 230px;
+        line-height: 1.34;
+    }
+
+    .ex-line-product {
+        font-size: 11px;
+        margin-bottom: 4px;
+    }
+
+    .ex-line-name {
+        font-style: italic;
+        margin-bottom: 2px;
+        line-height: 1.30;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-tax-inline {
+        width: 100%;
+        margin-top: 12px;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .ex-tax-inline td {
+        border: none;
+        padding: 1px 0;
+        font-size: 10px;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-tax-label {
+        text-align: right;
+        font-weight: bold;
+        padding-right: 16px;
+    }
+
+    .ex-tax-rate {
+        text-align: center;
+        width: 34px;
+    }
+
+    .ex-tax-pct {
+        text-align: center;
+        width: 24px;
+    }
+
+    .ex-tax-amt {
+        text-align: right;
+        width: 110px;
+        font-weight: bold;
+    }
+
+    .ex-untaxed-table {
+        width: 50%;
+        margin-left: auto;
+        margin-right: 0;
+        border-collapse: collapse;
+        table-layout: fixed;
+        margin-top: 3%;
+        margin-bottom: 3%;
+    }
+
+    .ex-untaxed-table td {
+        border: 1px solid #000;
+        padding: 6px 7px;
+        font-size: 10px;
+        line-height: 1.25;
+        vertical-align: middle;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        box-sizing: border-box;
+    }
+.ex-untaxed-table td:first-child {
+    width: 60%;
+}
+
+.ex-untaxed-table td:last-child {
+    width: 40%;
+    text-align: right;
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+}
+
+    .ex-amount-words td {
+        padding: 7px 8px !important;
+        font-size: 10px;
+    }
+
+    .ex-eoe {
+        float: right;
+        font-style: italic;
+    }
+
+    .ex-export-final-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        margin-top: 0;
+    }
+
+    .ex-export-final-table td {
+        border: 1px solid #000;
+        vertical-align: top;
+        padding: 6px 8px;
+        box-sizing: border-box;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-export-final-single {
+        position: relative;
+        min-height: 145px;
+    }
+
+    .ex-export-pan-line {
+        font-size: 10px;
+        line-height: 1.22;
+        margin-bottom: 4px;
+        width: 56%;
+    }
+
+    .ex-export-bank-title {
+        font-size: 10px;
+        font-weight: bold;
+        margin-top: 3px;
+        margin-bottom: 2px;
+        width: 56%;
+    }
+
+    .ex-export-bank-row {
+        font-size: 10px;
+        line-height: 1.18;
+        margin-bottom: 1px;
+        width: 56%;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-export-sign-simple {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 40%;
+        min-height: 105px;
+        padding: 4px 8px;
+        box-sizing: border-box;
+        border-left: 1px solid #000;
+        border-top: 1px solid #000;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-export-sign-company {
+        text-align: left;
+        font-size: 10px;
+        font-weight: bold;
+        line-height: 1.18;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-export-sign-gap {
+        height: 48px;
+    }
+
+    .ex-export-sign-text {
+        text-align: right;
+        font-size: 10px;
+        line-height: 1.15;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-footer-note {
+        text-align: center;
+        margin-top: 2px;
+        font-size: 10px;
+        line-height: 1.2;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+
+    .ti-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .ti-table th,
+    .ti-table td {
+        border: 1px solid #000;
+        padding: 6px 7px;
+        vertical-align: top;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .ti-bottom-joined-table {
+        margin-top: 0;
+    }
+
+    .ti-bottom-joined-cell {
+        padding: 8px 8px 4px 8px;
+        border-top: none;
+    }
+
+    .ti-tax-words-line {
+        font-size: 10px;
+        line-height: 1.28;
+        margin-top: 0;
+        margin-bottom: 6px;
+    }
+
+    .ti-tax-words-label {
+        display: inline-block;
+    }
+
+    .ti-tax-words-colon {
+        display: inline-block;
+        width: 16px;
+        text-align: center;
+    }
+
+    .ti-tax-words-value {
+        display: inline-block;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .ti-bottom-bank-outside {
+        width: 54%;
+        margin-left: auto;
+        margin-right: 0;
+        margin-top: 5%;
+        font-size: 10px;
+        line-height: 1.22;
+        padding-top: 0;
+        padding-right: 6px;
+        box-sizing: border-box;
+    }
+
+    .ti-bank-title {
+        text-align: left;
+        font-size: 10px;
+        margin-bottom: 2px;
+    }
+
+    .ti-bank-row {
+        white-space: nowrap;
+        margin-bottom: 1px;
+    }
+
+    .ti-bank-label {
+        display: inline-block;
+        width: 150px;
+    }
+
+    .ti-bank-colon {
+        display: inline-block;
+        width: 16px;
+        text-align: center;
+    }
+
+    .ti-bank-value {
+        display: inline-block;
+        font-weight: bold;
+    }
+
+    .ti-company-sign-wrap {
+        width: 54%;
+        margin-left: auto;
+        margin-right: 0;
+        margin-top: 2px;
+        padding-top: 0;
+        border-left: 1px solid #000;
+        border-top: 1px solid #000;
+        box-sizing: border-box;
+    }
+
+    .ti-company-line {
+        text-align: left;
+        font-size: 10px;
+        font-weight: bold;
+        line-height: 1.22;
+        padding-top: 2px;
+    }
+
+    .ti-sign-space {
+        height: 44px;
+    }
+
+    .ti-sign-row-only {
+        width: 100%;
+        display: table;
+        table-layout: fixed;
+    }
+
+    .ti-sign-row-only .ti-sign-right {
+        display: table-cell;
+        text-align: right;
+        vertical-align: bottom;
+        font-size: 10px;
+        line-height: 1.2;
+        padding-right: 8px;
+    }
+
+    .ti-pan-outside-line {
+        margin-top: -18px;
+        padding-left: 8px;
+        font-size: 10px;
+        line-height: 1.2;
+    }
+
+    .ti-pan-label {
+        display: inline-block;
+        min-width: 170px;
+    }
+
+    .ti-pan-colon {
+        display: inline-block;
+        width: 16px;
+        text-align: center;
+    }
+
+    .ti-pan-value {
+        display: inline-block;
+        font-weight: bold;
+        font-size: 15px;
+    }
+    /* Control Estimate right-side row heights */
+.ex-right-grid-table tr:nth-child(1) td {
+    height: 50px;
+}
+
+.ex-right-grid-table tr:nth-child(2) td {
+    height: 50px;
+}
+
+/* Payment Terms row */
+.ex-right-grid-table tr:nth-child(3) td {
+    height: 142px;
+}
+
+/* Space between label and value */
+.ex-right-grid-table td &gt; .ex-right-grid-label {
+    margin-bottom: 5px !important;
+}
+
+/* Control Payment Terms value area */
+.ex-right-grid-table tr:nth-child(3) .ex-right-grid-value-normal {
+    min-height: 46px !important;
+    display: block;
+}
+</style>
+
+                    <div class="page ex-page">
+<div style="position: relative; width: 100%; min-height: 40px; margin-bottom: 8px; padding-top: 4px; background: #fff; border: 0 !important; outline: 0 !important; box-shadow: none !important;">
+    <div style="text-align: center; font-size: 17px; font-weight: bold; line-height: 1.2; background: #fff; border: 0 !important; outline: 0 !important; box-shadow: none !important;">
+        ESTIMATE
+    </div>
+<!--    <div style="position: absolute; top: 4px; right: 0; font-size: 17px; font-style: italic; line-height: 1.2; background: #fff; border: 0 !important; outline: 0 !important; box-shadow: none !important;">-->
+<!--        Original-->
+<!--    </div>-->
+</div>
+                        <table class="ex-table ex-mt-2">
+                            <tr>
+                                <td class="ex-main-left">
+                                    <div class="ex-company-name" t-esc="doc.company_id.partner_id.legal_name"/>
+
+                                    <div class="ex-font-14">
+                                        <t t-if="doc.company_id.partner_id.street">
+                                            <span t-esc="doc.company_id.partner_id.street"/>,
+                                        </t>
+                                        <t t-if="doc.company_id.partner_id.street2">
+                                            <span t-esc="doc.company_id.partner_id.street2"/>,
+                                        </t>
+                                        <t t-if="doc.company_id.partner_id.city">
+                                            <span t-esc="doc.company_id.partner_id.city"/>,
+                                        </t>
+                                        <t t-if="doc.company_id.partner_id.state_id">
+                                            <span t-esc="doc.company_id.partner_id.state_id.name"/>
+                                        </t>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        <t t-if="doc.company_id.partner_id.city">
+                                            <span t-esc="doc.company_id.partner_id.city"/>
+                                        </t>
+                                        <t t-if="doc.company_id.partner_id.zip">
+                                            - <span t-esc="doc.company_id.partner_id.zip"/>
+                                        </t>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        GSTIN/UIN : <span t-esc="doc.company_id.vat"/>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        State Name : <span t-esc="doc.company_id.partner_id.state_id.name"/>,
+                                        Code : <span t-esc="doc.company_id.partner_id.state_id.l10n_in_tin"/>
+                                    </div>
+                                    <div class="ex-font-14">
+                                        UDYAM : <span t-esc="doc.company_id.udhyam"/>
+                                    </div>
+                                    <div class="ex-font-14" t-if="doc.company_id.company_registry">
+                                        CIN: <span t-esc="doc.company_id.company_registry"/>
+                                    </div>
+
+                                    <div class="ex-buyer-separator"/>
+
+                                    <div class="ex-font-14">Buyer (Bill to)</div>
+
+                                    <div class="ex-buyer-name">
+                                        <span t-esc="doc.partner_id.legal_name or ''"/>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        <span t-esc="doc.partner_id.street or ''"/>
+                                        <t t-if="doc.partner_id.street">,</t>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        <span t-esc="doc.partner_id.street2 or ''"/>
+                                        <t t-if="doc.partner_id.street2">,</t>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        <span t-esc="doc.partner_id.city or ''"/>
+                                        <t t-if="doc.partner_id.zip">
+                                            - <span t-esc="doc.partner_id.zip or ''"/>
+                                        </t>
+                                        <t t-if="doc.partner_id.state_id">
+                                            , <span t-esc="doc.partner_id.state_id.name or ''"/>
+                                        </t>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        <span t-esc="doc.partner_id.country_id.name or ''"/>
+                                    </div>
+
+                                            <div class="ti-font-15">
+                                                GSTIN/UIN : <span t-esc="doc.company_id.vat"/>
+                                            </div>
+                                            <div class="ti-font-15">
+                                                PAN/IT No
+                                                <span class="ti-label-gap">:</span>
+                                                <span t-esc="doc.partner_id.l10n_in_pan_entity_id.name or '' "/>
+                                            </div>
+                                            <div class="ti-font-15">
+                                                State Name : <span t-esc="doc.company_id.partner_id.state_id.name"/>,
+                                                Code : <span t-esc="doc.company_id.partner_id.state_id.l10n_in_tin"/>
+                                            </div>
+                                </td>
+
+                                <td class="ex-main-right">
+                                    <table class="ex-right-grid-table">
+                                        <tr>
+                                            <td class="ex-v-top">
+                                                <span class="ex-right-grid-label">Voucher No.</span>
+                                                <span class="ex-right-grid-value" t-esc="doc.name"/>
+                                            </td>
+                                            <td class="ex-v-top">
+                                                <span class="ex-right-grid-label">Dated</span>
+                                                <span class="ex-right-grid-value" t-esc="doc.invoice_date" t-options="{'widget': 'date'}"/>
+                                            </td>
+                                        </tr>
+<!--                                                                                <tr>-->
+<!--                                            <td class="ex-v-top">-->
+<!--                                                <span class="ex-right-grid-label"/>-->
+<!--                                            </td>-->
+<!--                                            <td class="ex-v-top">-->
+<!--                                                <span class="ex-right-grid-label">Mode/Terms of Payment</span>-->
+<!--                                                <span class="ex-right-grid-value" t-esc="doc.invoice_payment_term_id.name or ''"/>-->
+<!--                                            </td>-->
+<!--                                        </tr>-->
+
+                                        <tr>
+                                            <td class="ex-v-top">
+                                                <span class="ex-right-grid-label">Buyer's Ref./Order No.</span>
+                                                <span class="ex-right-grid-value-normal" t-esc="doc.invoice_origin or ''"/>
+                                            </td>
+                                            <td class="ex-v-top">
+                                                <span class="ex-right-grid-label">Other Reference</span>
+                                                <span class="ex-right-grid-value-normal" t-esc="doc.ref or ''"/>
+                                            </td>
+                                        </tr>
+
+                                        <!-- <tr>
+                                            <td class="ex-v-top">
+                                                <span class="ex-right-grid-label">Dispatched through</span>
+                                                <span class="ex-right-grid-value-normal"/>
+                                            </td>
+                                            <td class="ex-v-top">
+                                                <span class="ex-right-grid-label">Destination</span>
+                                                <span class="ex-right-grid-value-normal"/>
+                                            </td>
+                                        </tr> -->
+
+                                        <tr>
+                                            <!-- <td colspan="2" class="ex-v-top">
+                                                <span class="ex-right-grid-label">Terms of Delivery</span>
+                                                <span class="ex-right-grid-value-normal" style="min-height: 46px;"/>
+                                            </td> -->
+                                        <td colspan="2" class="ex-v-top">
+                                                <span class="ex-right-grid-label" style="display:inline !important;">Payment Terms :</span>
+                                                <span class="ex-right-grid-value-normal" style="min-height:46px; display:inline !important; font-weight:bold" t-esc="doc.invoice_payment_term_id.name or ''"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+<table class="ex-table ex-line-table">
+    <thead>
+        <tr>
+            <th class="ex-col-sl">Sl No.</th>
+            <th class="ex-col-desc">Description of Services</th>
+            <th class="ex-col-hsn">HSN/SAC</th>
+            <th class="ex-col-gst">GST Rate</th>
+            <th class="ex-col-rate">Rate</th>
+            <th class="ex-col-per">per</th>
+            <th class="ex-col-amt">Amount</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <t t-set="sq_no" t-value="1"/>
+
+        <t t-foreach="doc.invoice_line_ids" t-as="line">
+            <t t-if="line.display_type == 'product'">
+                <tr>
+                    <td class="ex-text-center ex-v-top">
+                        <span t-esc="sq_no"/>
+                        <t t-set="sq_no" t-value="sq_no + 1"/>
+                    </td>
+
+                    <td class="ex-desc-cell">
+                        <div class="ex-line-product" t-esc="line.product_id.name"/>
+                        <t t-if="line.name and line.name != line.product_id.name">
+                            <div class="ex-line-name" t-esc="line.name"/>
+                        </t>
+                    </td>
+
+                    <td class="ex-text-center ex-v-top">
+                        <span t-esc="line.l10n_in_hsn_code or ''"/>
+                    </td>
+
+                    <td class="ex-text-center ex-v-top">
+                        <span t-esc="', '.join(line.tax_ids.mapped('name'))"/>
+                    </td>
+
+<td class="ex-text-right ex-v-top ex-amount-nowrap">
+    <span t-esc="doc.currency_id.symbol or ''"/>
+    <span t-esc="'{:,.2f}'.format(line.price_unit or 0.0)"/>
+</td>
+
+                    <td class="ex-text-center ex-v-top">
+                        <span t-esc="line.product_uom_id.name"/>
+                    </td>
+
+<td class="ex-text-right ex-v-top ex-bold ex-amount-nowrap">
+    <span t-esc="doc.currency_id.symbol or ''"/>
+    <span t-esc="'{:,.2f}'.format(line.price_subtotal or 0.0)"/>
+</td>
+                </tr>
+            </t>
+        </t>
+
+<tr>
+    <td class="ex-text-center ex-v-mid"/>
+    <td class="ex-text-right ex-v-mid">Total</td>
+    <td class="ex-text-center ex-v-mid"/>
+    <td class="ex-text-center ex-v-mid"/>
+    <td class="ex-text-right ex-v-mid"/>
+    <td class="ex-text-center ex-v-mid"/>
+    <td class="ex-text-right ex-bold ex-amount-nowrap">
+        <span t-esc="doc.currency_id.symbol or ''"/>
+        <span t-esc="'{:,.2f}'.format(doc.amount_untaxed or 0.0)"/>
+    </td>
+</tr>
+    </tbody>
+</table>
+
+
+                    <table class="ex-table ex-untaxed-table">
+    <tr>
+        <td>Untaxed Amount:</td>
+        <td class="ex-text-right ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(doc.amount_untaxed or 0.0)"/>
+        </td>
+    </tr>
+
+    <tr t-if="hsn_show_sgst">
+        <td>SGST:</td>
+        <td class="ex-text-right ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(hsn_sgst_total or 0.0)"/>
+        </td>
+    </tr>
+
+    <tr t-if="hsn_show_cgst">
+        <td>CGST:</td>
+        <td class="ex-text-right ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(hsn_cgst_total or 0.0)"/>
+        </td>
+    </tr>
+
+    <tr t-if="hsn_show_igst">
+        <td>IGST:</td>
+        <td class="ex-text-right ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(hsn_igst_total or 0.0)"/>
+        </td>
+    </tr>
+
+    <tr t-if="hsn_show_cess">
+        <td>CESS:</td>
+        <td class="ex-text-right ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(hsn_cess_total or 0.0)"/>
+        </td>
+    </tr>
+
+    <tr>
+        <td><strong>Total:</strong></td>
+        <td class="ex-text-right ex-bold ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(doc.amount_total or 0.0)"/>
+        </td>
+    </tr>
+
+    <tr>
+        <td>Paid:</td>
+        <td class="ex-text-right ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format((doc.amount_total - doc.amount_residual) or 0.0)"/>
+        </td>
+    </tr>
+
+    <tr>
+        <td><strong>Balance Due:</strong></td>
+        <td class="ex-text-right ex-bold ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(doc.amount_residual or 0.0)"/>
+        </td>
+    </tr>
+</table>
+
+<!-- BOTTOM -->
+<table style="width:100%; border-collapse:collapse; table-layout:fixed; margin-top:0;">
+    <tr>
+        <td style="border:1px solid #000; padding:0; vertical-align:top;">
+
+            <!-- Amount in words -->
+            <div style="padding:6px 8px 4px 8px; font-size:10px; line-height:1.28;">
+                <span style="font-weight:bold">Amount Chargeable (in words)</span>
+                <div style="float:right; font-style:italic; white-space:nowrap;">E. &amp; O.E</div>
+                <br/>
+                <span t-esc="doc.convert_num_to_text(                             doc.amount_total,                             doc.currency_id.currency_unit_label,                             doc.currency_id.currency_subunit_label,                             doc.company_id.country_id                         )"/>
+            </div>
+
+            <!-- Main row: left (PAN) + right (bank + signatory) -->
+            <div style="display:table; width:100%; table-layout:fixed; box-sizing:border-box;">
+
+                <!-- LEFT: empty or PAN -->
+                <div style="display:table-cell; width:46%; vertical-align:bottom; padding:6px 8px 8px 8px; box-sizing:border-box;">
+                    <div style="font-size:10px; line-height:1.22;">
+                        <span style="display:inline-block; min-width:170px;">Company's PAN</span>
+                        <span style="display:inline-block; width:16px; text-align:center;">:</span>
+                        <span style="font-weight:bold; font-size:11px;" t-esc="doc.company_id.partner_id.l10n_in_pan_entity_id.name or ''"/>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Bank details + Signatory box -->
+                <div style="display:table-cell; width:54%; vertical-align:bottom; padding:0; box-sizing:border-box;">
+
+                    <!-- Bank details -->
+                    <div style="padding:6px 8px 4px 8px; font-size:10px; line-height:1.22; box-sizing:border-box;">
+                        <div style="font-weight:bold; margin-bottom:2px;">Company's Bank Details</div>
+                        <div style="margin-bottom:1px;">
+                            <span style="display:inline-block; width:150px;">Bank Name</span>
+                            <span style="display:inline-block; width:16px; text-align:center;">:</span>
+                            <span style="font-weight:bold;" t-esc="doc.partner_bank_id.bank_id.name or ''"/>
+                        </div>
+                        <div style="margin-bottom:1px;">
+                            <span style="display:inline-block; width:150px;">A/c No.</span>
+                            <span style="display:inline-block; width:16px; text-align:center;">:</span>
+                            <span style="font-weight:bold;" t-esc="doc.partner_bank_id.acc_number or ''"/>
+                        </div>
+                        <div style="margin-bottom:1px;">
+                            <span style="display:inline-block; width:150px;">Branch &amp; IFS Code</span>
+                            <span style="display:inline-block; width:16px; text-align:center;">:</span>
+                            <span style="font-weight:bold;" t-esc="(doc.partner_bank_id.bank_id.street or '') + ' ' + (doc.partner_bank_id.bank_id.bic or '')"/>
+                        </div>
+                    </div>
+
+                    <!-- Signatory: left+top border only, stuck to bottom-right -->
+                    <div style="border-left:1px solid #000; border-top:1px solid #000; min-height:90px; padding:4px 8px 4px 8px; box-sizing:border-box; width:100%; position:relative;">
+                        <div style="font-size:10px; font-weight:bold; line-height:1.22;">
+                            for <span t-esc="doc.company_id.partner_id.legal_name"/>
+                        </div>
+                        <div style="position:absolute; bottom:4px; right:8px; font-size:10px; line-height:1.2;">
+                            Authorised Signatory
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </td>
+    </tr>
+</table>
+
+                        <div class="ex-footer-note">
+                            <div>This is a Computer Generated Document</div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </t>

@@ -34,6 +34,7 @@
         'reports/missing_data.xml',
         'reports/journal_voucher.xml',
         'views/account.xml',
+        'views/res_partner.xml',
     ],
     'website': 'https://planet-odoo.com/',
     'installable': True,

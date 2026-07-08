@@ -4,3 +4,4 @@ from . import accounts
 # from . import gstr
 from . import payment_report
 from . import contact_report
+from . import res_partner

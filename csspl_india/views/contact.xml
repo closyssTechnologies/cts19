@@ -12,6 +12,8 @@
                 <field name="vat" string="GST No" placeholder="e.g. BE0477472701" readonly="parent_id != False"/>
             </xpath>
             <xpath expr="//field[@name='category_id']" position="after">
+                <field name="supplier_rank" invisible="1"/>
+                <field name="supplier_code" readonly="1" invisible="supplier_rank == 0"/>
                 <field name="cancelled_cheque" filename="check_file_name" force_save="1"/>
                 <field name="check_file_name" invisible="1" force_save="1"/>
                 <field name="pan_card" filename="pan_file_name" force_save="1"/>

@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- PAPER FORMAT -->
+    <record id="css_invoice_indonesia_with_logo" model="report.paperformat">
+        <field name="name">Invoice Indonesia</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">15</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">15</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">16</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- REPORT ACTION -->
+    <record id="css_pdf_report_inovice_indonesia" model="ir.actions.report">
+        <field name="name">INVOICE INDONESIA</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">csspl_india.tax_invoice_indonesia</field>
+        <field name="report_file">csspl_india.tax_invoice_indonesia</field>
+        <field name="print_report_name">(object._get_report_base_filename())</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="paperformat_id" ref="csspl_india.css_invoice_indonesia_with_logo"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="tax_invoice_indonesia">
+
+        <t t-call="web.html_container">
+            <meta charset="utf-8"/>
+            <t t-foreach="docs" t-as="o">
+
+
+                     <div class="page" style="margin-top:90px;position:relative;">
+                      <t t-if="o.company_id.logo">
+    <img t-att-src="image_data_uri(o.company_id.logo)"
+         style="max-width:120px; max-height:80px; margin-bottom:18px;"/>
+</t>
+<t t-else="">
+    <div style="border:1px solid black; width:100px; height:70px; margin-bottom:18px; text-align:center; line-height:70px;">
+        No Logo
+    </div>
+</t>
+
+
+                     <table style="width:100%; border:1px solid black; border-collapse:collapse; font-size:15px;">
+
+    <!-- COMPANY -->
+    <tr>
+        <td colspan="3" style="padding:6px; border-bottom:1px solid black;">
+            <strong><t t-esc="o.company_id.name"/></strong><br/>
+            <t t-esc="o.company_id.street"/>,
+            <t t-esc="o.company_id.city"/> -
+            <t t-esc="o.company_id.zip"/>,
+            <t t-esc="o.company_id.country_id.name"/><br/>
+            NPWP: <t t-esc="o.company_id.vat"/>
+        </td>
+    </tr>
+
+    <!-- INVOICE TITLE -->
+    <tr>
+    <td colspan="3" style="padding:6px; border-bottom:1px solid black;">
+        <div style="text-align:right; font-size:20px; font-weight:bold;">
+            INVOICE
+        </div>
+    </td>
+</tr>
+
+    <!-- MAIN ROW -->
+    <!-- ROW 1 : CLIENT HEADER -->
+<!-- ROW 1 -->
+<tr>
+
+    <!-- CLIENT LABEL (LEFT SMALL COLUMN) -->
+    <td style="width:20%; border-right:1px solid black; padding:6px; vertical-align:top;">
+        <strong>Client</strong>
+    </td>
+
+    <!-- CLIENT DETAILS (MIDDLE COLUMN) -->
+    <td style="width:40%; border-right:1px solid black; padding:6px; vertical-align:top; line-height:1.5;">
+
+        <strong><t t-esc="o.partner_id.name"/></strong><br/>
+
+        <t t-esc="o.partner_id.street"/><br/>
+        <t t-esc="o.partner_id.street2"/><br/>
+
+        <t t-esc="o.partner_id.city"/> -
+        <t t-esc="o.partner_id.zip"/><br/><br/>
+
+        <t t-set="contact" t-value="o.partner_id.child_ids.filtered(lambda c: c.type == 'contact')[:1]"/>
+
+<t>
+    Attn : <t t-esc="contact and contact[0].name or ''"/><br/>
+</t>
+
+        <br/>
+
+        GR No : <t t-esc="o.ref"/>
+
+    </td>
+
+    <!-- RIGHT SIDE (INVOICE GRID) -->
+    <td style="width:40%; padding:0; vertical-align:top;">
+
+        <table style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:15px;">
+
+            <colgroup>
+                <col style="width:55%;"/>
+                <col style="width:45%;"/>
+            </colgroup>
+
+            <tr>
+                <td style="border:1px solid black; padding:4px;">Invoice No.</td>
+                <td style="border:1px solid black; padding:4px; text-align:right;">
+                    <t t-esc="o.name"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="border:1px solid black; padding:4px;">Invoice Date</td>
+                <td style="border:1px solid black; padding:4px; text-align:right;">
+                    <t t-esc="o.invoice_date" t-options='{"widget":"date"}'/>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="border:1px solid black; padding:4px;">Proposal No.</td>
+                <td style="border:1px solid black; padding:4px; text-align:right;">
+                    <t t-esc="o.invoice_origin or ''"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="border:1px solid black; padding:4px;">Purchase Order No.</td>
+                <td style="border:1px solid black; padding:4px; text-align:right;">
+                    <t t-esc="o.invoice_origin or ''"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="border:1px solid black; padding:4px;">Purchase Order Date</td>
+                <td style="border:1px solid black; padding:4px; text-align:right;">
+                    <t t-esc="o.invoice_date" t-options='{"widget":"date"}'/>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="border:1px solid black; padding:4px;">Tax Invoice No.</td>
+                <td style="border:1px solid black; padding:4px; text-align:right;">
+                    <t t-esc="o.name"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="border:1px solid black; padding:4px;">Other Reff(s)</td>
+                <td style="border:1px solid black; padding:4px; text-align:right;">
+                    Vendor No : <t t-esc="o.partner_id.ref or ''"/>
+                </td>
+            </tr>
+
+        </table>
+
+    </td>
+
+</tr>
+
+
+</table>
+                        <table style="width:100%; border-collapse:collapse; font-size:15px;">
+
+    <!-- HEADER -->
+    <thead>
+        <tr>
+            <th style="border:1px solid black; padding:6px; width:20%;">
+
+                No</th>
+            <th style="border:1px solid black; padding:6px;">Details</th>
+            <th style="border:1px solid black; padding:6px; width:25%; text-align:right;">Amount</th>
+        </tr>
+    </thead>
+
+    <!-- BODY -->
+    <tbody>
+    <t t-foreach="o.invoice_line_ids.filtered(lambda l: l.display_type == 'product')" t-as="line">
+        <tr>
+            <td style="border:1px solid black; padding:6px; vertical-align:top;">
+                <strong t-esc="o.project_id.project_no or ''"/>
+            </td>
+
+            <td style="border:1px solid black; padding:6px; vertical-align:top;">
+                <strong><t t-esc="line.name"/></strong>
+            </td>
+
+            <td style="border:1px solid black; padding:6px; text-align:right;">
+                <span t-field="line.price_subtotal"
+                      t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+            </td>
+        </tr>
+    </t>
+
+    <!-- EMPTY SPACE ROW -->
+    <tr>
+        <td style="border:1px solid black; height:200px;"></td>
+        <td style="border:1px solid black;"></td>
+        <td style="border:1px solid black;"></td>
+    </tr>
+
+</tbody>
+
+    <!-- TOTALS -->
+    <tfoot>
+
+        <tr>
+            <td style="border:1px solid black;"></td>
+            <td style="border:1px solid black; text-align:right; padding:6px;">
+                <strong>Total</strong>
+            </td>
+            <td style="border:1px solid black; text-align:right; padding:6px;">
+                <span t-field="o.amount_untaxed"
+                      t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="border:1px solid black;"></td>
+            <td style="border:1px solid black; text-align:right; padding:6px;">
+                <strong>VAT</strong>
+            </td>
+            <td style="border:1px solid black; text-align:right; padding:6px;">
+                <span t-field="o.amount_tax"
+                      t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="border:1px solid black;"></td>
+            <td style="border:1px solid black; text-align:right; padding:6px;">
+                <strong>Please pay this amount</strong>
+            </td>
+            <td style="border:1px solid black; text-align:right; padding:6px;">
+                <span t-field="o.amount_total"
+                      t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+            </td>
+        </tr>
+
+    </tfoot>
+
+</table>
+
+
+
+<!-- PAYMENT + SIGNATURE -->
+<table style="width:100%; border:1px solid black; border-collapse:collapse; margin-top:8px; table-layout:fixed;">
+    <tr>
+
+        <!-- LEFT SIDE -->
+        <td style="width:60%; padding:8px; font-size:11px; line-height:1.6; vertical-align:top; word-break:break-word;">
+
+            <!-- AMOUNT IN WORDS -->
+            <t t-esc="o.currency_id.name"/>
+            <t t-esc="o.currency_id.amount_to_text(o.amount_tax)"/>
+
+            <br/><br/>
+
+            <!-- BANK DETAILS -->
+            <strong>PLEASE TRANSFER THROUGH SWIFT:</strong><br/>
+            <t t-esc="o.company_id.name"/><br/>
+
+            <t t-esc="o.company_id.street"/>
+            <t t-if="o.company_id.street2">, <t t-esc="o.company_id.street2"/></t>
+            <t t-if="o.company_id.zip"> - <t t-esc="o.company_id.zip"/></t>,
+            <t t-esc="o.company_id.country_id.name"/><br/><br/>
+
+            <!-- BANK DETAILS -->
+    <div>
+
+    <t t-foreach="o.company_id.bank_ids" t-as="bank">
+
+        <div>
+            Swift Code:
+            <t t-esc="bank.bank_id.bic or ''"/>
+
+            - Bank Code:
+            <t t-esc="bank.bank_id.bank_code if 'bank_code' in bank.bank_id._fields else ''"/>
+
+            - Branch Code:
+            <t t-esc="bank.bank_id.branch_code if 'branch_code' in bank.bank_id._fields else ''"/>
+        </div>
+
+        <div>
+            Bank Acc Number:
+            <t t-esc="bank.acc_number or ''"/>
+            (<t t-esc="o.currency_id.name or ''"/>)
+        </div>
+
+        <br/>
+
+    </t>
+
+</div>
+
+        </td>
+
+        <!-- RIGHT SIDE -->
+        <td style="width:40%; padding:8px; font-size:13px; vertical-align:top; word-break:break-word;">
+
+            <div style="margin-top:40px;">for</div>
+
+            <div style="margin-top:60px;">
+                <strong><t t-esc="o.company_id.name"/></strong>
+            </div>
+
+        </td>
+
+    </tr>
+</table>
+
+<!-- FINAL FOOTER -->
+<div style="margin-top:20px; padding-top:6px; text-align:center; font-size:12px;">
+    <strong><t t-esc="o.company_id.name"/></strong><br/>
+
+    <t t-esc="o.company_id.street"/>
+    <t t-if="o.company_id.street2">, <t t-esc="o.company_id.street2"/></t>
+<!--    <t t-esc="o.company_id.city"/>-->
+    <t t-if="o.company_id.zip"> - <t t-esc="o.company_id.zip"/></t>,
+    <t t-esc="o.company_id.country_id.name"/><br/>
+
+    <span>Phone: <t t-esc="o.company_id.phone or ''"/></span>
+    <span style="margin-left:10px;">| Web: <t t-esc="o.company_id.website or ''"/></span>
+</div>
+
+                    </div>
+
+                </t>
+            </t>
+
+
+    </template>
+
+</odoo>

@@ -1,0 +1,1056 @@
+<odoo>
+
+    <!-- PAPER FORMAT -->
+    <record id="css_export_invoice_format" model="report.paperformat">
+        <field name="name">Export Invoice Static</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+<field name="margin_top">5</field>
+<field name="margin_bottom">5</field>
+<field name="margin_left">5</field>
+<field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- REPORT ACTION -->
+    <record id="css_pdf_report_export_invoice" model="ir.actions.report">
+        <field name="name">EXPORT INVOICE</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">customization.export_invoice_report_document</field>
+        <field name="report_file">customization.export_invoice_report_document</field>
+        <field name="print_report_name">'Export Invoice - %s' %(object._get_report_base_filename())</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="paperformat_id" ref="customization.css_export_invoice_format"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- EXPORT INVOICE TEMPLATE -->
+    <template id="export_invoice_report_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="customization.css_export_invoice_report_layout">
+
+                    <t t-set="lut_bond_no" t-value="doc.company_id.lut_bond_no or ''"/>
+                    <t t-set="lut_from_date" t-value="doc.company_id.lut_from_date or ''"/>
+                    <t t-set="lut_to_date" t-value="doc.company_id.lut_to_date or ''"/>
+                    <t t-set="company_bank" t-value="doc.company_id.bank_ids and doc.company_id.bank_ids[0] or False"/>
+                    <t t-set="swift_code" t-value="company_bank and company_bank.swift_code or ''"/>
+
+                    <!-- E-INVOICE DATA -->
+                    <t t-set="l10n_in_edi_json" t-value="doc._get_l10n_in_edi_response_json() if 'l10n_in_edi_status' in doc._fields else {}"/>
+                    <t t-set="irn_no" t-value="l10n_in_edi_json.get('Irn') or (doc.l10n_in_irn if 'l10n_in_irn' in doc._fields else (doc.l10n_in_irn_number if 'l10n_in_irn_number' in doc._fields else ''))"/>
+                    <t t-set="ack_no" t-value="l10n_in_edi_json.get('AckNo') or (doc.l10n_in_ack_no if 'l10n_in_ack_no' in doc._fields else '')"/>
+                    <t t-set="ack_date" t-value="l10n_in_edi_json.get('AckDt') or (doc.l10n_in_ack_date if 'l10n_in_ack_date' in doc._fields else '')"/>
+
+                    <!-- EXPORT NOTE LOGIC -->
+                    <t t-set="gst_treatment" t-value="doc.partner_id.l10n_in_gst_treatment or ''"/>
+                    <t t-set="show_tax_line" t-value="gst_treatment in ['overseas', 'special_economic_zone']"/>
+
+                    <t t-set="hsn_summary" t-value="doc._l10n_in_get_hsn_summary_table() if doc.company_id.account_fiscal_country_id.code == 'IN' else {}"/>
+<t t-set="hsn_items" t-value="hsn_summary.get('items', [])"/>
+<t t-set="hsn_show_sgst" t-value="bool(hsn_summary.get('has_gst'))"/>
+<t t-set="hsn_show_cgst" t-value="bool(hsn_summary.get('has_gst'))"/>
+<t t-set="hsn_show_igst" t-value="bool(hsn_summary.get('has_igst'))"/>
+<t t-set="hsn_show_cess" t-value="bool(hsn_summary.get('has_cess'))"/>
+
+<t t-set="hsn_sgst_total" t-value="sum((item.get('tax_amount_sgst', 0.0) or 0.0) for item in hsn_items)"/>
+<t t-set="hsn_cgst_total" t-value="sum((item.get('tax_amount_cgst', 0.0) or 0.0) for item in hsn_items)"/>
+<t t-set="hsn_igst_total" t-value="sum((item.get('tax_amount_igst', 0.0) or 0.0) for item in hsn_items)"/>
+<t t-set="hsn_cess_total" t-value="sum((item.get('tax_amount_cess', 0.0) or 0.0) for item in hsn_items)"/>
+
+
+<style>
+    .ex-page {
+        font-family: 'DejaVu Sans', sans-serif;
+        font-size: 12px;
+        color: #000;
+        line-height: 1.30;
+    }
+
+    .ex-text-left { text-align: left; }
+    .ex-text-center { text-align: center; }
+    .ex-text-right { text-align: right; }
+    .ex-v-top { vertical-align: top; }
+    .ex-v-mid { vertical-align: middle; }
+    .ex-bold { font-weight: bold; }
+    .ex-italic { font-style: italic; }
+
+    .ex-font-14 { font-size: 12px; }
+    .ex-font-15 { font-size: 13px; }
+    .ex-font-16 { font-size: 14px; }
+    .ex-font-17 { font-size: 15px; }
+    .ex-font-21 { font-size: 19px; }
+
+    .ex-mt-2 { margin-top: 2px; }
+    .ex-mt-4 { margin-top: 4px; }
+    .ex-mt-6 { margin-top: 6px; }
+    .ex-mt-8 { margin-top: 8px; }
+
+    .ex-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .ex-table th,
+    .ex-table td {
+        border: 1px solid #000;
+        padding: 6px 7px;
+        vertical-align: top;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        box-sizing: border-box;
+    }
+
+    .ex-top-wrap {
+    position: relative;
+    width: 100%;
+    min-height: 205px;
+    margin-bottom: 2px;
+    overflow: hidden;
+    border: 0 !important;
+}
+
+.ex-top-title-center {
+    text-align: center;
+    font-size: 19px;
+    font-weight: bold;
+    line-height: 1.2;
+    margin-top: 2px;
+    white-space: nowrap;
+}
+
+.ex-top-note-center {
+    width: 68%;
+    margin: 4px auto 0 auto;
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.30;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.ex-top-original {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 15px;
+    font-style: italic;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.ex-top-einvoice {
+    position: absolute;
+    top: 59px;
+    right: 52px;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.ex-top-irn-block {
+    position: absolute;
+    left: 8px;
+    top: 88px;
+    width: 60%;
+    font-size: 12px;
+    line-height: 1.38;
+}
+
+.ex-top-irn-line {
+    margin-bottom: 4px;
+}
+
+.ex-top-irn-label {
+    display: inline-block;
+    min-width: 95px;
+}
+
+.ex-top-irn-colon {
+    display: inline-block;
+    width: 16px;
+    text-align: center;
+}
+
+.ex-top-irn-value {
+    display: inline-block;
+    font-weight: bold;
+    font-size: 12px;
+    vertical-align: top;
+    max-width: 80%;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.ex-top-qr-side {
+    position: absolute;
+    top: 88px;
+    right: 10px;
+    width: 210px;
+    text-align: center;
+}
+
+.ex-top-qr-img {
+    width: 180px;
+    height: 180px;
+}
+
+    .ex-export-note {
+        text-align: center;
+        font-size: 11px;
+        line-height: 1.30;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-main-left {
+        width: 53%;
+        vertical-align: top;
+        padding: 8px 10px !important;
+    }
+
+    .ex-main-right {
+        width: 47%;
+        vertical-align: top;
+        padding: 0 !important;
+    }
+
+    .ex-company-name,
+    .ex-buyer-name {
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 1.28;
+    }
+
+    .ex-main-left div,
+    .ex-main-right div {
+        margin-bottom: 2px;
+    }
+
+    .ex-label-gap {
+        display: inline-block;
+        min-width: 16px;
+        text-align: center;
+    }
+
+    .ex-buyer-separator {
+        border-top: 1px solid #000;
+        margin-top: 6px;
+        margin-bottom: 6px;
+        width: calc(100% + 20px);
+        margin-left: -10px;
+    }
+
+    .ex-right-grid-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        border: none;
+    }
+
+    .ex-right-grid-table td,
+    .ex-right-grid-table th {
+        border: 1px solid #000;
+        padding: 6px 7px;
+        font-size: 12px;
+        line-height: 1.28;
+        vertical-align: top;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        box-sizing: border-box;
+    }
+
+    .ex-right-grid-table tr:first-child td,
+    .ex-right-grid-table tr:first-child th {
+        border-top: none;
+    }
+
+    .ex-right-grid-table td:first-child,
+    .ex-right-grid-table th:first-child {
+        border-left: none;
+    }
+
+    .ex-right-grid-label {
+        display: block;
+        font-size: 12px;
+        line-height: 1.2;
+        margin-bottom: 2px;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-right-grid-value {
+        display: block;
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 1.22;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-right-grid-value-normal {
+        display: block;
+        font-size: 12px;
+        line-height: 1.22;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-line-table th {
+        text-align: center;
+        font-weight: normal;
+        font-size: 12px;
+        padding: 7px 6px;
+    }
+
+    .ex-line-table td {
+        font-size: 12px;
+        padding: 7px 6px;
+    }
+
+.ex-col-sl   { width: 4%; }
+.ex-col-desc { width: 47%; }
+.ex-col-hsn  { width: 9%; }
+.ex-col-gst  { width: 7%; }
+.ex-col-rate { width: 13%; }
+.ex-col-per  { width: 5%; }
+.ex-col-amt  { width: 15%; }
+.ex-amount-nowrap,
+.ex-line-table td.ex-amount-nowrap,
+.ex-untaxed-table td.ex-amount-nowrap {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+}
+    .ex-desc-cell {
+        padding: 12px 12px 10px 14px !important;
+        min-height: 230px;
+        line-height: 1.34;
+    }
+
+    .ex-line-product {
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+
+    .ex-line-name {
+        font-style: italic;
+        margin-bottom: 2px;
+        line-height: 1.30;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-tax-inline {
+        width: 100%;
+        margin-top: 12px;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .ex-tax-inline td {
+        border: none;
+        padding: 1px 0;
+        font-size: 12px;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-tax-label {
+        text-align: right;
+        font-weight: bold;
+        padding-right: 16px;
+    }
+
+    .ex-tax-rate {
+        text-align: center;
+        width: 34px;
+    }
+
+    .ex-tax-pct {
+        text-align: center;
+        width: 24px;
+    }
+
+    .ex-tax-amt {
+        text-align: right;
+        width: 110px;
+        font-weight: bold;
+    }
+
+.ex-untaxed-table {
+
+    width: 40%;
+    margin-left: auto;
+    margin-right: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-top: 3mm;
+    margin-bottom: 3mm;
+}
+
+    .ex-untaxed-table td {
+        border: 1px solid #000;
+        padding: 6px 7px;
+        font-size: 12px;
+        line-height: 1.25;
+        vertical-align: middle;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        box-sizing: border-box;
+    }
+.ex-untaxed-table td:first-child {
+    width: 60%;
+}
+
+.ex-untaxed-table td:last-child {
+    width: 40%;
+    text-align: right;
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+}
+
+    .ex-amount-nowrap {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+}
+
+
+    .ex-amount-words td {
+        padding: 7px 8px !important;
+        font-size: 12px;
+    }
+
+    .ex-eoe {
+        <!-- float: right; -->
+        font-style: italic;
+    }
+
+    .ex-export-final-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        margin-top: 0;
+    }
+
+    .ex-export-final-table td {
+        border: 1px solid #000;
+        vertical-align: top;
+        padding: 6px 8px;
+        box-sizing: border-box;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-export-final-single {
+        position: relative;
+        min-height: 145px;
+    }
+
+    .ex-export-amount-line {
+        margin-bottom: 8px;
+        line-height: 1.22;
+        width: 56%;
+    }
+
+    .ex-export-pan-line {
+        font-size: 12px;
+        line-height: 1.22;
+        margin-bottom: 4px;
+        width: 56%;
+    }
+
+    .ex-export-bank-title {
+        font-size: 12px;
+        margin-top: 3px;
+        margin-bottom: 2px;
+        width: 56%;
+    }
+
+    .ex-export-bank-row {
+        font-size: 12px;
+        line-height: 1.18;
+        margin-bottom: 1px;
+        width: 56%;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-export-sign-simple {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 40%;
+        min-height: 105px;
+        padding: 4px 8px;
+        box-sizing: border-box;
+        border-left: 1px solid #000;
+        border-top: 1px solid #000;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-export-sign-company {
+        text-align: right;
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 1.18;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-export-sign-gap {
+        height: 48px;
+    }
+
+    .ex-export-sign-text {
+        text-align: right;
+        font-size: 12px;
+        line-height: 1.15;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ex-footer-note {
+        text-align: center;
+        margin-top: 2px;
+        font-size: 12px;
+        line-height: 1.2;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+</style>
+
+                    <div class="page ex-page">
+
+                        <!-- TOP -->
+<div class="ex-top-wrap">
+    <div class="ex-top-original">(ORIGINAL FOR RECIPIENT)</div>
+
+    <div class="ex-top-title-center">TAX INVOICE</div>
+
+    <t t-if="show_tax_line">
+        <div class="ex-top-note-center">
+            (SUPPLY MEANT FOR EXPORT/SUPPLY TO SEZ UNIT OR SEZ DEVELOPER FOR AUTHORISED OPERATIONS UNDER BOND OR LETTER OF UNDERTAKING WITHOUT PAYMENT OF IGST)
+        </div>
+    </t>
+
+    <div class="ex-top-einvoice">e-Invoice</div>
+
+    <div class="ex-top-irn-block">
+        <div class="ex-top-irn-line">
+            <span class="ex-top-irn-label">IRN</span>
+            <span class="ex-top-irn-colon">:</span>
+            <span class="ex-top-irn-value" t-esc="irn_no"/>
+        </div>
+        <div class="ex-top-irn-line">
+            <span class="ex-top-irn-label">Ack No.</span>
+            <span class="ex-top-irn-colon">:</span>
+            <span class="ex-top-irn-value" t-esc="ack_no"/>
+        </div>
+        <div class="ex-top-irn-line">
+            <span class="ex-top-irn-label">Ack Date</span>
+            <span class="ex-top-irn-colon">:</span>
+            <span class="ex-top-irn-value" t-esc="ack_date"/>
+        </div>
+    </div>
+
+    <div class="ex-top-qr-side">
+        <t t-if="l10n_in_edi_json.get('SignedQRCode')">
+            <img class="ex-top-qr-img" t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('QR', l10n_in_edi_json.get('SignedQRCode'), 200, 200, 0)"/>
+        </t>
+    </div>
+</div>
+
+
+                        <!-- PARTY + DETAILS -->
+                        <table class="ex-table ex-mt-2">
+                            <tr>
+                                <td class="ex-main-left">
+                                    <div class="ex-company-name" t-esc="doc.company_id.name"/>
+
+                                    <div class="ex-font-14">
+                                        <t t-if="doc.company_id.partner_id.street">
+                                            <span t-esc="doc.company_id.partner_id.street"/>,
+                                        </t>
+                                        <t t-if="doc.company_id.partner_id.street2">
+                                            <span t-esc="doc.company_id.partner_id.street2"/>,
+                                        </t>
+                                        <t t-if="doc.company_id.partner_id.city">
+                                            <span t-esc="doc.company_id.partner_id.city"/>,
+                                        </t>
+                                        <t t-if="doc.company_id.partner_id.state_id">
+                                            <span t-esc="doc.company_id.partner_id.state_id.name"/>
+                                        </t>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        <t t-if="doc.company_id.partner_id.city">
+                                            <span t-esc="doc.company_id.partner_id.city"/>
+                                        </t>
+                                        <t t-if="doc.company_id.partner_id.zip">
+                                            - <span t-esc="doc.company_id.partner_id.zip"/>
+                                        </t>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        UDYAM : <span t-esc="doc.company_id.udhyam"/>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        GSTIN/UIN : <span t-esc="doc.company_id.vat"/>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        State Name : <span t-esc="doc.company_id.partner_id.state_id.name"/>,
+                                        Code : <span t-esc="doc.company_id.partner_id.state_id.l10n_in_tin"/>
+                                    </div>
+
+                                    <div class="ex-font-14" t-if="doc.company_id.company_registry">
+                                        CIN: <span t-esc="doc.company_id.company_registry"/>
+                                    </div>
+
+                                    <div class="ex-buyer-separator"/>
+
+                                    <div class="ex-font-14">Buyer (Bill to)</div>
+
+                                    <div class="ex-buyer-name">
+                                        <t t-if="doc.partner_id.parent_id.name">
+                                            <span t-esc="doc.partner_id.parent_id.name"/>
+                                        </t>
+                                        <t t-else="">
+                                            <span t-esc="doc.partner_id.name"/>
+                                        </t>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        <t t-if="doc.partner_id.street">
+                                            <span t-esc="doc.partner_id.street"/>,
+                                        </t>
+                                        <t t-if="doc.partner_id.street2">
+                                            <span t-esc="doc.partner_id.street2"/>,
+                                        </t>
+                                        <t t-if="doc.partner_id.city">
+                                            <span t-esc="doc.partner_id.city"/>,
+                                        </t>
+                                        <t t-if="doc.partner_id.state_id">
+                                            <span t-esc="doc.partner_id.state_id.name"/>
+                                        </t>
+                                    </div>
+
+                                    <div class="ex-font-14">
+                                        <t t-if="doc.partner_id.city">
+                                            <span t-esc="doc.partner_id.city"/>
+                                        </t>
+                                        <t t-if="doc.partner_id.zip">
+                                            - <span t-esc="doc.partner_id.zip"/>
+                                        </t>
+                                    </div>
+
+<!--                                    <div class="ex-font-14">-->
+<!--                                        GSTIN/UIN-->
+<!--                                        <span class="ex-label-gap">:</span>-->
+<!--                                        <span t-esc="doc.partner_id.vat"/>-->
+<!--                                    </div>-->
+
+<!--                                    <div class="ex-font-14">-->
+<!--                                        PAN/IT No-->
+<!--                                        <span class="ex-label-gap">:</span>-->
+<!--                                        <span t-esc="doc.partner_id.l10n_in_pan_entity_id.name or ''"/>-->
+<!--                                    </div>-->
+
+<!--                                    <div class="ex-font-14">-->
+<!--                                        State Name-->
+<!--                                        <span class="ex-label-gap">:</span>-->
+<!--                                        <span t-esc="doc.partner_id.state_id.name"/>,-->
+<!--                                        Code : <span t-esc="doc.partner_id.state_id.l10n_in_tin"/>-->
+<!--                                    </div>-->
+
+<!--                                    <div class="ex-font-14">-->
+<!--                                        Place of Supply-->
+<!--                                        <span class="ex-label-gap">:</span>-->
+<!--                                        <span t-esc="doc.l10n_in_state_id.name or ''"/>-->
+<!--                                    </div>-->
+                                </td>
+
+                                <td class="ex-main-right">
+                                  <table class="ex-right-grid-table">
+    <tr>
+        <td class="ex-v-top">
+            <span class="ex-right-grid-label">Invoice No.</span>
+            <span class="ex-right-grid-value" t-esc="doc.name"/>
+        </td>
+        <td class="ex-v-top">
+            <span class="ex-right-grid-label">Dated</span>
+            <span class="ex-right-grid-value" t-esc="doc.invoice_date" t-options="{'widget': 'date'}"/>
+        </td>
+    </tr>
+
+    <tr>
+        <td class="ex-v-top">
+            <span class="ex-right-grid-label">Delivery Note</span>
+            <span class="ex-right-grid-value-normal"/>
+        </td>
+        <td class="ex-v-top">
+            <span class="ex-right-grid-label"/>
+            <span class="ex-right-grid-value-normal"/>
+        </td>
+    </tr>
+
+    <tr>
+        <td class="ex-v-top">
+            <span class="ex-right-grid-label">Reference No. &amp; Date.</span>
+            <span class="ex-right-grid-value-normal" t-esc="doc.ref or ''"/>
+        </td>
+        <td class="ex-v-top">
+            <span class="ex-right-grid-label">Other References</span>
+            <span class="ex-right-grid-value-normal"/>
+        </td>
+    </tr>
+
+    <tr>
+        <td class="ex-v-top">
+            <span class="ex-right-grid-label">Buyer's Order No.</span>
+            <span class="ex-right-grid-value-normal" t-esc="doc.invoice_origin or ''"/>
+        </td>
+        <td class="ex-v-top">
+            <span class="ex-right-grid-label">Dated</span>
+            <span class="ex-right-grid-value-normal" t-esc="doc.invoice_date_due" t-options="{'widget': 'date'}"/>
+        </td>
+    </tr>
+
+    <tr>
+        <td class="ex-v-top">
+            <span class="ex-right-grid-label">Dispatch Doc No.</span>
+            <span class="ex-right-grid-value-normal"/>
+        </td>
+        <td class="ex-v-top">
+            <span class="ex-right-grid-label">Delivery Note Date</span>
+            <span class="ex-right-grid-value-normal"/>
+        </td>
+    </tr>
+
+    <tr>
+        <td class="ex-v-top">
+            <span class="ex-right-grid-label">Dispatched through</span>
+            <span class="ex-right-grid-value-normal"/>
+        </td>
+        <td class="ex-v-top">
+            <span class="ex-right-grid-label">Destination</span>
+            <span class="ex-right-grid-value-normal"/>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2" class="ex-v-top">
+            <span class="ex-right-grid-label">Country:</span>
+            <span class="ex-right-grid-value" t-esc="doc.partner_id.country_id.name or ''"/>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2" class="ex-v-top">
+            <span class="ex-right-grid-label">LUT/Bond No. :</span>
+            <span class="ex-right-grid-value" t-esc="lut_bond_no or ''"/>
+
+            <div class="ex-mt-4">
+                <span class="ex-right-grid-label" style="display:inline;">From:</span>
+                <span class="ex-right-grid-value-normal" style="display:inline;" t-esc="lut_from_date or ''"/>
+                <span style="display:inline-block; width: 18px;"/>
+                <span class="ex-right-grid-label" style="display:inline;">To:</span>
+                <span class="ex-right-grid-value-normal" style="display:inline;" t-esc="lut_to_date or ''"/>
+            </div>
+        </td>
+    </tr>
+</table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- LINE ITEMS -->
+                        <table class="ex-table ex-line-table">
+                            <thead>
+                                <tr>
+                                    <th class="ex-col-sl">Sr No.</th>
+                                    <th class="ex-col-desc">Particulars</th>
+                                    <th class="ex-col-hsn">HSN/SAC</th>
+                                    <th class="ex-col-gst">GST Rate</th>
+                                    <th class="ex-col-rate">Rate</th>
+                                    <th class="ex-col-per">per</th>
+                                    <th class="ex-col-amt">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="sq_no" t-value="1"/>
+                                <t t-set="tax_lines" t-value="doc.line_ids.filtered(lambda l: l.tax_line_id)"/>
+
+                                <t t-foreach="doc.invoice_line_ids" t-as="line">
+                                    <t t-if="line.display_type == 'product'">
+                                        <tr>
+                                            <td class="ex-text-center ex-v-top">
+                                                <span t-esc="sq_no"/>
+                                                <t t-set="sq_no" t-value="sq_no + 1"/>
+                                            </td>
+
+                                            <td class="ex-desc-cell">
+                                                <div class="ex-line-product" t-esc="line.product_id.name"/>
+                                                <t t-if="line.name and line.name != line.product_id.name">
+                                                    <div class="ex-line-name" t-esc="line.name"/>
+                                                </t>
+
+                                                <table class="ex-table ex-tax-inline">
+                                                    <t t-foreach="tax_lines" t-as="tline">
+                                                        <tr>
+                                                            <td class="ex-tax-label">
+                                                                <span t-esc="tline.name"/>
+                                                            </td>
+                                                            <td class="ex-tax-rate">
+                                                                <span t-esc="tline.tax_line_id.amount" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 0}"/>
+                                                            </td>
+                                                            <td class="ex-tax-pct">%</td>
+                                                            <td class="ex-tax-amt">
+                                                                <span t-esc="abs(tline.price_subtotal)" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </table>
+                                            </td>
+
+                                            <td class="ex-text-center ex-v-top">
+                                                <span t-esc="line.l10n_in_hsn_code or ''"/>
+                                            </td>
+
+                                            <td class="ex-text-center ex-v-top">
+                                                <span t-esc="', '.join(line.tax_ids.mapped('name'))"/>
+                                            </td>
+
+<td class="ex-text-right ex-v-top ex-amount-nowrap">
+    <span t-esc="doc.currency_id.symbol or ''"/>
+    <span t-esc="'{:,.2f}'.format(line.price_unit or 0.0)"/>
+</td>
+
+                                            <td class="ex-text-center ex-v-top">
+                                                <span t-esc="line.product_uom_id.name"/>
+                                            </td>
+
+   <td class="ex-text-right ex-v-top ex-bold ex-amount-nowrap">
+    <span t-esc="doc.currency_id.symbol or ''"/>
+    <span t-esc="'{:,.2f}'.format(line.price_subtotal or 0.0)"/>
+</td>
+                                        </tr>
+                                    </t>
+                                </t>
+
+ <tr>
+    <td class="ex-text-center ex-v-mid"/>
+    <td class="ex-text-right ex-v-mid">Total</td>
+    <td class="ex-text-center ex-v-mid"/>
+    <td class="ex-text-center ex-v-mid"/>
+    <td class="ex-text-right ex-v-mid"/>
+    <td class="ex-text-center ex-v-mid"/>
+    <td class="ex-text-right ex-bold ex-amount-nowrap">
+        <span t-esc="doc.currency_id.symbol or ''"/>
+        <span t-esc="'{:,.2f}'.format(doc.amount_total or 0.0)"/>
+    </td>
+</tr>
+
+                            </tbody>
+                        </table>
+<table class="ex-table ex-untaxed-table">
+    <tr>
+        <td>Untaxed Amount:</td>
+
+        <td class="ex-text-right ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(doc.amount_untaxed or 0.0)"/>
+        </td>
+    </tr>
+
+    <tr t-if="hsn_show_sgst">
+        <td>SGST:</td>
+        <td class="ex-text-right ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(hsn_sgst_total or 0.0)"/>
+        </td>
+    </tr>
+
+    <tr t-if="hsn_show_cgst">
+        <td>CGST:</td>
+        <td class="ex-text-right ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(hsn_cgst_total or 0.0)"/>
+        </td>
+    </tr>
+
+    <tr t-if="hsn_show_igst">
+        <td>IGST:</td>
+        <td class="ex-text-right ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(hsn_igst_total or 0.0)"/>
+        </td>
+    </tr>
+
+    <tr t-if="hsn_show_cess">
+        <td>CESS:</td>
+        <td class="ex-text-right ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(hsn_cess_total or 0.0)"/>
+        </td>
+    </tr>
+
+    <tr>
+        <td><strong>Total:</strong></td>
+<td class="ex-text-right ex-bold ex-amount-nowrap">
+    <span t-esc="doc.currency_id.symbol or ''"/>
+    <span t-esc="'{:,.2f}'.format(doc.amount_total or 0.0)"/>
+</td>
+    </tr>
+
+    <tr>
+        <td>Paid:</td>
+<td class="ex-text-right ex-amount-nowrap">
+    <span t-esc="doc.currency_id.symbol or ''"/>
+    <span t-esc="'{:,.2f}'.format((doc.amount_total - doc.amount_residual) or 0.0)"/>
+</td>
+    </tr>
+
+    <tr>
+        <td><strong>Balance Due:</strong></td>
+        <td class="ex-text-right ex-bold ex-amount-nowrap">
+            <span t-esc="doc.currency_id.symbol or ''"/>
+            <span t-esc="'{:,.2f}'.format(doc.amount_residual or 0.0)"/>
+        </td>
+    </tr>
+</table>
+                        <!-- AMOUNT WORDS -->
+                        <table class="ex-table ex-amount-words">
+                            <tr>
+                                <td>
+<table style="width:100%; border-collapse:collapse; table-layout:fixed; border:none;">
+    <tr>
+        <td style="border:none; padding:0; text-align:left; vertical-align:top; width:70%;">
+            Amount Chargeable (in words)
+        </td>
+        <td style="border:none; padding:0; text-align:right; vertical-align:top; width:30%; white-space:nowrap;">
+            E. &amp; O.E
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" style="border:none; padding:0;">
+            <span class="ex-bold ex-font-15" t-esc="doc.currency_id.amount_to_text(doc.amount_total)"/>
+        </td>
+    </tr>
+</table>
+                                </td>
+                            </tr>
+                        </table>
+
+<!-- EXPORT LOWER SECTION -->
+<table class="ex-table ex-export-final-table">
+    <tr>
+        <td class="ex-export-final-single">
+            <div class="ex-export-pan-line">
+                Company's PAN / IEC Code:
+                <span class="ex-bold" t-esc="doc.company_id.partner_id.l10n_in_pan_entity_id.name or ''"/>
+            </div>
+
+            <div class="ex-export-pan-line" style="text-decoration: underline;">Declaration</div>
+
+            <div class="ex-export-bank-title">BANK DETAILS</div>
+
+            <div class="ex-export-bank-row">
+                Bank Name:
+                <span t-esc="doc.partner_bank_id.bank_id.name or ''"/>
+            </div>
+
+            <div class="ex-export-bank-row">
+                Account Name:
+                <span t-esc="doc.company_id.name"/>
+            </div>
+
+            <div class="ex-export-bank-row">
+                Account No.:
+                <span t-esc="doc.partner_bank_id.acc_number or ''"/>
+            </div>
+
+            <div class="ex-export-bank-row">
+                Swift Code:
+                <span t-esc="swift_code"/>
+            </div>
+
+            <div class="ex-export-bank-row">
+                Address:
+                <span t-esc="doc.partner_bank_id.bank_id.street or ''"/>
+                <t t-if="doc.partner_bank_id.bank_id.city">, <span t-esc="doc.partner_bank_id.bank_id.city"/></t>
+                <t t-if="doc.partner_bank_id.bank_id.country">, <span t-esc="doc.partner_bank_id.bank_id.country.name"/></t>
+            </div>
+
+            <div class="ex-export-sign-simple">
+                <div class="ex-export-sign-company">
+                    for <span t-esc="doc.company_id.name"/>
+                </div>
+
+                <div class="ex-export-sign-gap"/>
+
+                <div class="ex-export-sign-text">Authorised Signatory</div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div class="ex-footer-note">
+    <div>SUBJECT TO KARNATAKA JURISDICTION</div>
+    <div style="margin-top:3px;">This is a Computer Generated Document</div>
+</div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- LAYOUT WRAPPER -->
+    <template id="css_export_invoice_report_layout">
+        <t t-if="not o" t-set="o" t-value="doc"/>
+        <t t-if="not company">
+            <t t-if="company_id">
+                <t t-set="company" t-value="company_id"/>
+            </t>
+            <t t-elif="o and 'company_id' in o">
+                <t t-set="company" t-value="o.company_id.sudo()"/>
+            </t>
+            <t t-else="else">
+                <t t-set="company" t-value="res_company"/>
+            </t>
+        </t>
+        <div t-attf-class="article o_report_layout_striped o_company_#{company.id}_layout" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+            <t t-raw="0"/>
+        </div>
+    </template>
+
+</odoo>

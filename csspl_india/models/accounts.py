@@ -1,7 +1,10 @@
+import math
+# models/__init__.py
 from odoo import fields,api,_,models
 from odoo.exceptions import ValidationError, UserError
 from num2words import num2words
 import re
+
 from odoo.exceptions import ValidationError, UserError
 from num2words import num2words
 import re
@@ -1316,6 +1319,30 @@ class InheritAccountingPayment(models.Model):
 
 class ChartAccount(models.Model):
     _inherit = 'account.account'
+    account_type = fields.Selection(
+        selection_add=[
+            ('asset_gst_tds_input_simple', 'GST INPUT and TDS Input'),
+            ('asset_gst_tds_input', 'GST INPUT and TDS Input(Current Assets)'),
+            ('asset_loans_advances', 'Loans & advances(Current Assets)'),
+            ('asset_investment', 'Investment'),
+            ('liability_statutory_dues', 'Statutory dues payable'),
+            ('liability_tax_provision', 'Tax provision(Current Liability)'),
+            ('liability_tds_payable', 'TDS Payable'),
+            ('liability_income_tax_provision', 'Income Tax Provision(Current Liability)'),
+            ('liability_trade_payable', 'Trade Payable'),
+        ],
+        ondelete={
+            'asset_gst_tds_input_simple': 'cascade',
+            'asset_gst_tds_input': 'cascade',
+            'asset_loans_advances': 'cascade',
+            'asset_investment': 'cascade',
+            'liability_statutory_dues': 'cascade',
+            'liability_tax_provision': 'cascade',
+            'liability_tds_payable': 'cascade',
+            'liability_income_tax_provision': 'cascade',
+            'liability_trade_payable': 'cascade',
+        }
+    )
 
     is_tds_ledger = fields.Boolean(string="TDS Ledger")
 
@@ -1605,6 +1632,26 @@ class PurchaseInherit(models.Model):
             return num2words(str(amount), lang='en_IN').replace('and', '').replace('point', 'and').replace(
                 'thous', 'thousand')
 
+    def convert_num_to_text(self, amount, unit_label, subunit_label, country):
+        if not amount:
+            return ''
+
+        integer_part = int(
+            math.floor(float(amount)))
+        decimal_part = round((float(amount) - integer_part) * 100)
+
+        try:
+            words = num2words(integer_part, lang='en_IN').title()
+        except Exception:
+            words = num2words(integer_part, lang='en').title()
+
+        result = f"{words} {unit_label}"
+        if decimal_part >= 1:
+            paise_words = num2words(decimal_part, lang='en_IN').title()
+            result += f" And {paise_words} {subunit_label}"
+        result += " Only"
+        return result
+
 
 class AnalyticAccountInherit(models.Model):
     _inherit = 'account.analytic.account'
@@ -1679,3 +1726,7 @@ class InheritAccountAnalytic(models.Model):
     #         account.credit = credit
     #         account.payments_transfer = pay_t
     #         account.balance = account.credit - account.debit
+
+
+
+
