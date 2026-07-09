@@ -48,10 +48,10 @@
                             <tr>
                                 <center colspan="3">
                                     <t t-if="doc.move_type == 'out_refund'">
-                                        <span style="font-size: 150%;">Bill of Supply</span>
+                                        <span style="font-size: 150%;">Tax Invoice</span>
                                     </t>
                                     <t t-else="">
-                                        <span style="font-size: 150%;">Bill of Supply</span>
+                                        <span style="font-size: 150%;">Tax Invoice</span>
                                     </t>
                                 </center>
                             </tr>
