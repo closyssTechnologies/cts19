@@ -128,6 +128,14 @@
                                     <span t-esc="doc.partner_id.state_id.name" class="content_text"/>
                                 </td>
                             </tr>
+                            <!-- Dispatch Warehouse Address -->
+                            <tr>
+                                <td style="border: 1px solid;padding:5px" colspan="8">
+                                    <strong style="padding: 5px" class="content_text">Dispatch Warehouse:</strong>
+                                    <br/>
+                                    <span style="padding: 5px" class="content_text" t-esc="doc.warehouse_name"/>
+                                </td>
+                            </tr>
 
                         </table>
                         <table style="width: 100%; border-collapse: collapse">

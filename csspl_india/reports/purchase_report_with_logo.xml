@@ -13,44 +13,33 @@
                 <div class="oe_structure"/>
                 <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
 
-                <table style="width: 100%;border: 1px solid;background-color: #FFFFFF;">
-                    <tr>
-                        <td style="width: 50%;color:black;background-color: #FFFFFF;padding-left: 3px;valign: top">
-                            <strong>Supplier (Bill From):</strong>
-                            <div t-field="o.partner_id"
-                                 t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;, &quot;phone&quot;, &quot;vat&quot;], &quot;no_marker&quot;: True, &quot;phone_icons&quot;: True}"/>
+               <table style="width:100%;border:1px solid;background-color:#FFFFFF;">
+    <tr>
+        <td style="width:50%;padding-left:3px;vertical-align:top;">
+            <strong>Supplier (Bill From):</strong>
 
-                        </td>
-                        <td style="width: 50%;valign: top;background-color: #FFFFFF;padding-left: 3px">
-                            <strong>To :</strong>
-                            <t t-if="o.dest_address_id">
-                                <div t-field="o.dest_address_id"
-                                     t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;, &quot;phone&quot;], &quot;no_marker&quot;: True, &quot;phone_icons&quot;: True}"
-                                     name="purchase_shipping_address"/>
-                            </t>
-                            <t t-else="">
-                                <div>
-                                    <span t-esc="o.partner_id.name or ''"/>
-                                    <br/>
-                                    <span t-esc="o.partner_id.street or ''"/>
-                                    <span t-esc="o.partner_id.street2 or ''"/>
-                                    <br/>
-                                    <span t-esc="o.partner_id.city or ''"/>,
-                                    <span t-esc="o.partner_id.state_id.name or ''"/>-
-                                    <span t-esc="o.partner_id.zip or ''"/>
-                                    <br/>
-                                    <span t-esc="o.partner_id.country_id.name or ''"/>
-                                    <br/>
-                                    GSTIN :
-                                    <span t-esc="o.partner_id.vat or ''"/>
-                                    <br/>
-                                </div>
+            <div t-field="o.partner_id"
+                 t-options="{
+                    'widget':'contact',
+                    'fields':['address','name','phone','vat'],
+                    'no_marker':True,
+                    'phone_icons':True
+                 }"/>
+        </td>
 
-                            </t>
+        <td style="width:50%;padding-left:3px;vertical-align:top;">
+            <strong>To :</strong>
 
-                        </td>
-                    </tr>
-                </table>
+            <div t-field="o.company_id.partner_id"
+                 t-options="{
+                    'widget':'contact',
+                    'fields':['address','name','phone'],
+                    'no_marker':True,
+                    'phone_icons':True
+                 }"/>
+        </td>
+    </tr>
+</table>
                 <table style="border: 1px solid;width: 100%">
                     <tr>
                         <td style="width: 50%;color:black;padding-left: 3px;padding-top: 2px">

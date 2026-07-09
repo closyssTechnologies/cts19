@@ -23,7 +23,7 @@ from collections import defaultdict
 
 class AccountMoveInherit(models.Model):
     _inherit = 'account.move'
-
+    warehouse_name=fields.Many2one('stock.warehouse', string="Warehouse")
     po_no = fields.Char('PO No')
     po_date = fields.Date('PO Date')
     service_date = fields.Date('Service Date')
@@ -57,7 +57,8 @@ class AccountMoveInherit(models.Model):
             if move.move_type == 'entry':
                 if move.line_ids:
                     total_debit = sum(move.line_ids.mapped('debit'))
-                    total_credit = sum(move.line_ids.mapped('credit'))
+                    total_credit = sum(move.line_ids.
+                                       mapped('credit'))
             if total_debit == 0 or total_credit == 0:
                 raise ValidationError(
                     _("You cannot save this Invoice because Debit or Credit total is zero.")

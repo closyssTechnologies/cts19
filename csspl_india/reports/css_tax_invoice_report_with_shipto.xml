@@ -245,9 +245,9 @@
                                     <span class="content_text">MH-19-0171004</span>
 
                                 </td>
-
-                                <td style="border: 1px solid;width:33.33%;padding: 5px" colspan="3">
-                                    <strong class="content_text">Buyer (Bill to)</strong>
+                                td<!-- Bill To -->
+                                <td style="border:1px solid;width:33.33%;padding:5px;" colspan="2">
+                                    <strong class="content_text">Buyer (Bill To)</strong>
                                     <br/>
                                     <strong>
                                         <span t-esc="doc.partner_id.parent_id.name or doc.partner_id.name"
@@ -255,20 +255,57 @@
                                     </strong>
                                     <br/>
                                     <span class="content_text">
-                                        <span t-esc="doc.partner_id.street or ''"/>,
-                                        <span t-esc="doc.partner_id.city or ''"/>
+                                        <span t-esc="doc.partner_id.street or ''"/>
                                         <br/>
-                                        <span t-esc="doc.partner_id.state_id.name or ''"/>
-                                        (<span t-esc="doc.partner_id.zip or ''"/>)
+                                        <span t-esc="doc.partner_id.city or ''"/>
+                                        <t t-if="doc.partner_id.state_id">
+                                            ,
+                                            <span t-esc="doc.partner_id.state_id.name"/>
+                                        </t>
+                                        <br/>
+                                        <span t-esc="doc.partner_id.zip or ''"/>
                                     </span>
                                     <br/>
-                                    <span class="header_text">GST:
+                                    <span class="header_text">
+                                        GST:
                                         <span t-esc="doc.partner_id.vat or 'URP'"/>
                                     </span>
                                 </td>
 
-                                <td style="border: 1px solid;width:33.33%;padding: 5px" colspan="3">
-                                    <strong class="content_text">Buyer (Ship to)</strong>
+                                <!-- Dispatch From -->
+                                <td style="border:1px solid;width:33.33%;padding:5px;" colspan="2">
+                                    <strong class="content_text">Dispatch From:</strong>
+                                    <br/>
+
+                                    <!-- Warehouse Name -->
+                                    <strong>
+                                        <span t-esc="doc.invoice_origin and doc.env['stock.picking'].search([('origin','=',doc.invoice_origin)], limit=1).picking_type_id.warehouse_id.name or ''"/>
+                                    </strong>
+
+<!--                                    <t t-set="warehouse"-->
+<!--                                       t-value="doc.invoice_origin and doc.env['stock.picking'].search([('origin','=',doc.invoice_origin)], limit=1).picking_type_id.warehouse_id"/>-->
+
+                                    <br/>
+                                    <span class="content_text">
+                                        <span t-esc="doc.warehouse_name.partner_id.street or ''"/>
+                                        <br/>
+
+                                        <span t-esc="doc.warehouse_name.partner_id.street2 or ''"/>
+                                        <br/>
+
+                                        <span t-esc="doc.warehouse_name.partner_id.city or ''"/>,
+                                        <span t-esc="doc.warehouse_name.partner_id.state_id.name or ''"/>
+                                        -
+                                        <span t-esc="doc.warehouse_name.partner_id.zip or ''"/>
+                                        <br/>
+
+                                        <span t-esc="doc.warehouse_name.partner_id.country_id.name or ''"/>
+                                    </span>
+                                </td>
+
+                                <!-- Ship To -->
+                                <td style="border:1px solid;width:33.33%;padding:5px;" colspan="2">
+                                    <strong class="content_text">Buyer (Ship To)</strong>
                                     <br/>
                                     <strong>
                                         <span t-esc="doc.partner_shipping_id.name or doc.partner_id.name"
@@ -276,17 +313,63 @@
                                     </strong>
                                     <br/>
                                     <span class="content_text">
-                                        <span t-esc="doc.partner_shipping_id.street or ''"/>,
-                                        <span t-esc="doc.partner_shipping_id.city or ''"/>
+                                        <span t-esc="doc.partner_shipping_id.street or ''"/>
                                         <br/>
-                                        <span t-esc="doc.partner_shipping_id.state_id.name or ''"/>
-                                        (<span t-esc="doc.partner_shipping_id.zip or ''"/>)
+                                        <span t-esc="doc.partner_shipping_id.city or ''"/>
+                                        <t t-if="doc.partner_shipping_id.state_id">
+                                            ,
+                                            <span t-esc="doc.partner_shipping_id.state_id.name"/>
+                                        </t>
+                                        <br/>
+                                        <span t-esc="doc.partner_shipping_id.zip or ''"/>
                                     </span>
                                     <br/>
-                                    <span class="header_text">GST:
+                                    <span class="header_text">
+                                        GST:
                                         <span t-esc="doc.partner_shipping_id.vat or 'URP'"/>
                                     </span>
                                 </td>
+                                <!--                                <td style="border: 1px solid;width:33.33%;padding: 5px" colspan="3">-->
+                                <!--                                    <strong class="content_text">Buyer (Bill to)</strong>-->
+                                <!--                                    <br/>-->
+                                <!--                                    <strong>-->
+                                <!--                                        <span t-esc="doc.partner_id.parent_id.name or doc.partner_id.name"-->
+                                <!--                                              class="content_text"/>-->
+                                <!--                                    </strong>-->
+                                <!--                                    <br/>-->
+                                <!--                                    <span class="content_text">-->
+                                <!--                                        <span t-esc="doc.partner_id.street or ''"/>,-->
+                                <!--                                        <span t-esc="doc.partner_id.city or ''"/>-->
+                                <!--                                        <br/>-->
+                                <!--                                        <span t-esc="doc.partner_id.state_id.name or ''"/>-->
+                                <!--                                        (<span t-esc="doc.partner_id.zip or ''"/>)-->
+                                <!--                                    </span>-->
+                                <!--                                    <br/>-->
+                                <!--                                    <span class="header_text">GST:-->
+                                <!--                                        <span t-esc="doc.partner_id.vat or 'URP'"/>-->
+                                <!--                                    </span>-->
+                                <!--                                </td>-->
+
+                                <!--                                <td style="border: 1px solid;width:33.33%;padding: 5px" colspan="3">-->
+                                <!--                                    <strong class="content_text">Buyer (Ship to)</strong>-->
+                                <!--                                    <br/>-->
+                                <!--                                    <strong>-->
+                                <!--                                        <span t-esc="doc.partner_shipping_id.name or doc.partner_id.name"-->
+                                <!--                                              class="content_text"/>-->
+                                <!--                                    </strong>-->
+                                <!--                                    <br/>-->
+                                <!--                                    <span class="content_text">-->
+                                <!--                                        <span t-esc="doc.partner_shipping_id.street or ''"/>,-->
+                                <!--                                        <span t-esc="doc.partner_shipping_id.city or ''"/>-->
+                                <!--                                        <br/>-->
+                                <!--                                        <span t-esc="doc.partner_shipping_id.state_id.name or ''"/>-->
+                                <!--                                        (<span t-esc="doc.partner_shipping_id.zip or ''"/>)-->
+                                <!--                                    </span>-->
+                                <!--                                    <br/>-->
+                                <!--                                    <span class="header_text">GST:-->
+                                <!--                                        <span t-esc="doc.partner_shipping_id.vat or 'URP'"/>-->
+                                <!--                                    </span>-->
+                                <!--                                </td>-->
                             </tr>
 
                             <tr>
