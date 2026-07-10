@@ -552,6 +552,13 @@ class AccountMoveInherit(models.Model):
 
 class AccountMoveLineInherit(models.Model):
     _inherit = 'account.move.line'
+    utr_no = fields.Text(
+        string="UTR No",
+        related="payment_id.narration",
+        readonly=True,
+        store=False,
+    )
+
 
     task_id = fields.Many2one('project.task')
     product_uom_id = fields.Many2one(
