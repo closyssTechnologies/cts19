@@ -1459,11 +1459,11 @@ class CustomExcel(models.TransientModel):
                     line.batch_payment_id.journal_id.bank_id.bic[:4]
                     == line.partner_bank_id.bank_id.bic[:4]
             ):
-                pay_method = "I"
+                pay_method = "A"
             elif line.amount > 200000:
-                pay_method = "R"
+                pay_method = "R41"
             else:
-                pay_method = "N"
+                pay_method = "N06"
 
             # ----------------------------------------
             # Unique Memo
