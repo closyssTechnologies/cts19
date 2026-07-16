@@ -1484,10 +1484,10 @@ class CustomExcel(models.TransientModel):
             # ----------------------------------------
 
             # A
-            sheet.write(row, 0, pay_method)
+            sheet.write(row, 0, "D")
 
             # B Blank
-            sheet.write(row, 1, "")
+            sheet.write(row, 1, pay_method)
 
             # C
             sheet.write(row, 2, "127284600000772")
