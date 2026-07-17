@@ -4,7 +4,7 @@ from odoo import fields,api,_,models
 from odoo.exceptions import ValidationError, UserError
 from num2words import num2words
 import re
-
+from odoo.tools import SQL
 from odoo.exceptions import ValidationError, UserError
 from num2words import num2words
 import re
@@ -1352,6 +1352,13 @@ class AccountInvoiceReport(models.Model):
     _inherit = "account.invoice.report"
 
     service_date = fields.Date('Service Date')
+
+    @api.model
+    def _select(self):
+        return SQL(
+            "%s, move.service_date AS service_date",
+            super()._select(),
+        )
 
     #
     #     @api.model
