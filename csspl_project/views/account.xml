@@ -363,11 +363,7 @@
             <xpath expr="//form" position="inside">
                 <field name="payment_ids" invisible="1"/>
             </xpath>
-            <xpath expr="//page[@name='aml_tab']//field[@name='line_ids']" position="attributes">
-                <attribute name="readonly">payment_ids != []</attribute>
-                <!--                <attribute name="attrs">{'readonly': [('payment_ids', '!=', False), ('move_type', '=', 'entry')]}</attribute>-->
-                <!--                <attribute name="readonly">[('payment_ids', '!=', False)]</attribute>-->
-            </xpath>
+
         </field>
     </record>
 
