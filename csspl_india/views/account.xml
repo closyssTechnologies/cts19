@@ -102,6 +102,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='journal_id']" position="after">
                 <field name="batch_payment_id"/>
+                <field name="narration"/>
             </xpath>
         </field>
     </record>

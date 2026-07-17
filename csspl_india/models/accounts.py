@@ -4,7 +4,7 @@ from odoo import fields,api,_,models
 from odoo.exceptions import ValidationError, UserError
 from num2words import num2words
 import re
-
+from odoo.tools import SQL
 from odoo.exceptions import ValidationError, UserError
 from num2words import num2words
 import re
@@ -1353,6 +1353,13 @@ class AccountInvoiceReport(models.Model):
 
     service_date = fields.Date('Service Date')
 
+    @api.model
+    def _select(self):
+        return SQL(
+            "%s, move.service_date AS service_date",
+            super()._select(),
+        )
+
     #
     #     @api.model
     # def _select(self):
@@ -1402,16 +1409,159 @@ class CustomExcel(models.TransientModel):
     summary_data = fields.Char(string='Filename')
 
     bank_select = fields.Selection([('axis', 'Axis Bank'),
-                                    ('icici', 'ICICI Bank')], string='Bank')
+                                    ('icici', 'ICICI Bank'),
+                                    ('yes_bank', 'Yes Bank')], string='Bank')
 
     def generate_xlsx_report(self):
         if self.bank_select == 'axis':
             return self.generate_xlsx_report_icici()
         if self.bank_select == 'icici':
             return self.generate_xlsx_report_axis()
+        if self.bank_select == 'yes_bank':
+            return self.generate_xlsx_report_yes_bank()
+
+    def generate_xlsx_report_yes_bank(self):
+        batch_id = self.env['account.batch.payment'].browse(self.env.context['active_id'])
+
+        file_name = f"{batch_id.name}_{fields.Date.today().strftime('%d%B%Y')}.xls"
+
+        bold = xlwt.easyxf('font: bold 1')
+        date_style = xlwt.easyxf(num_format_str='dd-MMM-yyyy')
+
+        workbook = xlwt.Workbook()
+        sheet = workbook.add_sheet("YES BANK")
+
+        # Optional column width
+        for col in range(18):
+            sheet.col(col).width = 25 * 256
+
+        # ----------------------------------------
+        # First Row
+        # ----------------------------------------
+        sheet.write(0, 0, "H")
+        sheet.write(0, 1, fields.Date.today(), date_style)
+        sheet.write(0, 2, "29323721")
+
+        row = 1
+
+        total_amount = 0
+        memo_dict = {}
+
+        for line in batch_id.payment_ids:
+
+            if not line.partner_bank_id.bank_id.bic:
+                raise ValidationError(
+                    f'Bank/IFSC not set in partner {line.partner_id.name}'
+                )
+
+            if not line.batch_payment_id.journal_id.bank_id.bic:
+                raise ValidationError(
+                    f'Bank/IFSC not set in Journal {line.partner_id.name}'
+                )
+
+            # ----------------------------------------
+            # Payment Mode
+            # ----------------------------------------
+            if (
+                    line.batch_payment_id.journal_id.bank_id.bic[:4]
+                    == line.partner_bank_id.bank_id.bic[:4]
+            ):
+                pay_method = "A"
+            elif line.amount > 200000:
+                pay_method = "R41"
+            else:
+                pay_method = "N06"
+
+            # ----------------------------------------
+            # Unique Memo
+            # ----------------------------------------
+            memo = line.memo or "MEMO"
+
+            if memo in memo_dict:
+                memo_dict[memo] += 1
+                unique_memo = f"{memo}-{memo_dict[memo]}"
+            else:
+                memo_dict[memo] = 1
+                unique_memo = memo
+
+            total_amount += line.amount
+
+            # ----------------------------------------
+            # Write Row
+            # ----------------------------------------
+
+            # A
+            sheet.write(row, 0, "D")
+
+            # B Blank
+            sheet.write(row, 1, pay_method)
+
+            # C
+            sheet.write(row, 2, "127284600000772")
+
+            # D
+            sheet.write(row, 3, "COMFORT TECHNO SERVICES PRIVATE LIMITED")
+
+            # E,F,G Blank
+            sheet.write(row, 4, "")
+            sheet.write(row, 5, "")
+            sheet.write(row, 6, "")
+
+            # H IFSC
+            sheet.write(row, 7, line.partner_bank_id.bank_id.bic or "")
+
+            # I Account Number
+            sheet.write(row, 8, line.partner_bank_id.acc_number or "")
+
+            # J Customer Name
+            sheet.write(row, 9, line.partner_id.name or "")
+
+            # K,L,M,N Blank
+            sheet.write(row, 10, "")
+            sheet.write(row, 11, "")
+            sheet.write(row, 12, "")
+            sheet.write(row, 13, "")
+
+            # O Unique Memo
+            sheet.write(row, 14, unique_memo)
+
+            # P Current Date
+            sheet.write(row, 15, fields.Date.today(), date_style)
+
+            # Q Amount
+            sheet.write(row, 16, line.amount)
+
+            # R Original Memo (duplicates allowed)
+            sheet.write(row, 17, memo)
+
+            row += 1
+
+        # ----------------------------------------
+        # Footer
+        # ----------------------------------------
+        sheet.write(row, 0, "F")
+        sheet.write(row, 1, len(batch_id.payment_ids))
+        sheet.write(row, 2, total_amount)
+
+        fp = BytesIO()
+        workbook.save(fp)
+
+        self.write({
+            'file_name': base64.b64encode(fp.getvalue()),
+            'summary_data': file_name,
+        })
+
+        fp.close()
+
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'custom.excel.class',
+            'view_mode': 'form',
+            'res_id': self.id,
+            'target': 'new',
+        }
 
     def generate_xlsx_report_axis(self):
-
         batch_id = self.env['account.batch.payment'].browse(self.env.context['active_id'])
         file_name = f"{batch_id.name}_{fields.Date.today().strftime('%d%B%Y')}.xls"
         # file_name = (batch_id.name) + '_' + (batch_id.today_date.strftime('%d%B%Y')) + '.xls'
