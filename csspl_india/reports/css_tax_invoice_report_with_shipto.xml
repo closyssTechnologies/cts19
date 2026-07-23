@@ -44,61 +44,76 @@
                         }
                     </style>
                     <div class="page">
+                        <t t-set="cutoff_date" t-value="datetime.date(2025, 4, 1)"/>
+                        <t t-set="current_date" t-value="doc.invoice_date"/>
+
                         <table style="width:100%">
                             <tr>
                                 <center colspan="3">
                                     <t t-if="doc.move_type == 'out_refund'">
-                                        <span style="font-size: 150%;">Tax Invoice</span>
+                                        <span style="font-size: 150%;">Credit Note</span>
                                     </t>
                                     <t t-else="">
-                                        <span style="font-size: 150%;">Tax Invoice</span>
+                                        <span style="font-size: 150%;">Tax invoice</span>
                                     </t>
                                 </center>
                             </tr>
                         </table>
 
-                        <table style="border-collapse: collapse; width: 100%">
-                            <t t-set="txn" t-value="doc.transaction_ids and doc.transaction_ids[0] or False"/>
+                        <table style="border-collapse: collapse; width: 100%; margin-top: 35px">
+                            <!-- Safe transaction lookup: field may not exist on account.move -->
+                            <t t-set="txn"
+                               t-value="(doc._fields.get('transaction_id') and doc.transaction_id) or (doc._fields.get('transaction_ids') and doc.transaction_ids and doc.transaction_ids[0]) or False"/>
 
-                            <t t-set="l10n_in_einvoice_json" t-value="doc._get_l10n_in_edi_response_json() or {}"/>
+                            <!-- Indian E-Invoice response JSON -->
+                            <t t-set="l10n_in_einvoice_json"
+                               t-value="doc._get_l10n_in_edi_response_json() if doc._fields.get('l10n_in_edi_attachment_id') and doc.l10n_in_edi_attachment_id and doc.l10n_in_edi_attachment_id.sudo().raw else {}"/>
                             <tr>
                                 <td style="padding:5px;border: 1px solid; vertical-align: top;" colspan="4">
+                                    <t t-set="irn_val"
+                                       t-value="l10n_in_einvoice_json.get('Irn') or (doc._fields.get('l10n_in_irn_number') and doc.l10n_in_irn_number) or (txn and txn._fields.get('name') and txn.name) or ''"/>
                                     <div>
                                         <span class="header_text">
                                             <b>IRN:</b>
                                         </span>
-                                        <span t-esc="l10n_in_einvoice_json.get('Irn') or (doc._fields.get('l10n_in_irn_number') and doc.l10n_in_irn_number) or ''"/>
+                                        <t t-if="irn_val and len(irn_val) &gt; 40">
+                                            <span t-esc="irn_val[:40]"/>
+                                            <br/>
+                                            <span t-esc="irn_val[40:]"/>
+                                        </t>
+                                        <t t-else="">
+                                            <span t-esc="irn_val"/>
+                                        </t>
                                     </div>
                                     <div>
                                         <span class="header_text">
                                             <b>Ack No.:</b>
                                         </span>
-                                        <span t-esc="l10n_in_einvoice_json.get('AckNo') or (doc._fields.get('l10n_in_ack_no') and doc.l10n_in_ack_no) or ''"/>
+                                        <span t-esc="l10n_in_einvoice_json.get('AckNo') or (doc._fields.get('l10n_in_ack_no') and doc.l10n_in_ack_no) or (txn and txn._fields.get('ack_no') and txn.ack_no) or ''"/>
                                     </div>
                                     <div>
                                         <span class="header_text">
                                             <b>Ack Date:</b>
                                         </span>
-                                        <span t-esc="l10n_in_einvoice_json.get('AckDt') or (doc._fields.get('l10n_in_ack_date') and doc.l10n_in_ack_date) or ''"/>
+                                        <span t-esc="l10n_in_einvoice_json.get('AckDt') or (doc._fields.get('l10n_in_ack_date') and doc.l10n_in_ack_date) or (txn and txn._fields.get('ack_date') and txn.ack_date) or ''"/>
                                     </div>
                                 </td>
 
-                                <td style="padding:5px; border: 1px solid; text-align:center; vertical-align: middle;"
-                                    colspan="4">
+                                <td style="padding:5px; border: 1px solid; text-align:center; vertical-align: middle;" colspan="4">
                                     <t t-if="l10n_in_einvoice_json.get('SignedQRCode')">
-                                        <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('QR', l10n_in_einvoice_json.get('SignedQRCode'), 500, 500, 0)"
-                                             style="max-width: 180px; max-height: 180px;"/>
+                                        <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('QR', l10n_in_einvoice_json.get('SignedQRCode'), 500, 500, 0)" style="max-width: 180px; max-height: 180px;"/>
                                     </t>
                                     <t t-elif="doc._fields.get('l10n_in_edi_qr_image') and doc.l10n_in_edi_qr_image">
-                                        <img t-att-src="image_data_uri(doc.l10n_in_edi_qr_image)"
-                                             style="max-width: 180px; max-height: 180px;"/>
+                                        <img t-att-src="image_data_uri(doc.l10n_in_edi_qr_image)" style="max-width: 180px; max-height: 180px;"/>
+                                    </t>
+                                    <t t-elif="txn and txn._fields.get('qr_code') and txn.qr_code">
+                                        <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('QR', txn.qr_code, 200, 200)" style="max-width: 180px; max-height: 180px;"/>
                                     </t>
                                     <t t-else="">
                                         <span class="content_text"/>
                                     </t>
                                 </td>
                             </tr>
-
                             <tr>
                                 <td style="border: 1px solid;" colspan="2">
                                     <strong style="padding: 5px" class="header_text">
@@ -114,13 +129,12 @@
                                         <t t-else="">Invoice Date:</t>
                                     </strong>
                                     <br/>
-                                    <span t-esc="doc.invoice_date" t-options="{'widget': 'date'}" class="content_text"
-                                          style="padding: 5px"/>
+                                    <span t-esc="doc.invoice_date" t-options='{"widget": "date", "format": "dd/MMM/yyyy"}' class="content_text" style="padding: 5px"/>
                                 </td>
                                 <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
                                     <strong style="padding: 5px" class="header_text">Buyer Order No:</strong>
                                     <br/>
-                                    <span style="padding: 5px" t-esc="doc.po_no" class="content_text"/>
+                                    <span style="padding: 5px" t-esc="doc.ref" class="content_text"/>
                                 </td>
                                 <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
                                     <strong style="padding: 5px" class="header_text">Date:</strong>
@@ -128,15 +142,17 @@
                                     <span style="padding: 5px" t-esc="doc.po_date" class="content_text"/>
                                 </td>
                             </tr>
-
                             <tr>
                                 <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
-                                    <strong style="padding: 5px" class="header_text">Reference No. &amp; Date:</strong>
+                                    <strong style="padding: 5px" class="header_text">Reference NO and Date:</strong>
                                     <br/>
                                 </td>
                                 <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
-                                    <strong style="padding: 5px" class="header_text">Other Reference:</strong>
+                                    <strong style="padding: 5px" class="header_text">Other reference:</strong>
                                     <br/>
+                                    <t t-if="doc.reversed_entry_id">
+                                        <span t-esc="doc.reversed_entry_id.name" style="padding: 5px" class="content_text"/>
+                                    </t>
                                 </td>
                                 <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
                                     <strong style="padding: 5px" class="header_text">Dispatched through:</strong>
@@ -149,53 +165,9 @@
                             </tr>
 
                             <tr>
-                                <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
-                                    <strong style="padding: 5px" class="header_text">Reverse Charge:</strong>
-                                    <br/>
-                                    <span style="padding: 5px" class="content_text"
-                                          t-esc="'Yes' if ('l10n_in_reverse_charge' in doc._fields and doc.l10n_in_reverse_charge) else 'No'"/>
-                                </td>
-                                <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
-                                    <strong style="padding: 5px" class="header_text">Transport:</strong>
-                                    <br/>
-                                    <t t-set="ewaybill"
-                                       t-value="doc.l10n_in_ewaybill_ids and doc.l10n_in_ewaybill_ids[0] or False"/>
-
-                                    <t t-if="ewaybill">
-                                        <span t-field="ewaybill.mode" style="padding: 5px" class="content_text"/>
-                                    </t>
-                                    <t t-else="">
-                                        <span class="content_text" style="padding: 5px">-</span>
-                                    </t>
-                                </td>
-                                <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
-                                    <strong style="padding: 5px" class="header_text">Vehicle No.:</strong>
-                                    <br/>
-                                    <t t-set="ewb"
-                                       t-value="doc.l10n_in_ewaybill_ids and doc.l10n_in_ewaybill_ids[0] or False"/>
-
-                                    <t t-if="ewb and ewb.vehicle_no">
-                                        <span t-esc="ewb.vehicle_no" style="padding: 5px" class="content_text"/>
-                                        <br/>
-                                        <small t-if="ewb.vehicle_type" style="padding-left: 5px; font-style: italic;">
-                                            (<span t-field="ewb.vehicle_type"/>)
-                                        </small>
-                                    </t>
-                                    <t t-else="">
-                                        <span class="content_text" style="padding: 5px">-</span>
-                                    </t>
-                                </td>
-                                <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
-                                    <strong style="padding: 5px" class="header_text">Station:</strong>
-                                    <br/>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td style="border: 1px solid;width:33.33%" colspan="2">
+                                <td style="border: 1px solid;width:50%" colspan="4">
                                     <strong>
-                                        <span style="padding: 5px" class="header_text"
-                                              t-esc="doc.company_id.parent_id.name or doc.company_id.name"/>
+                                        <span style="padding: 5px" class="header_text" t-esc="doc.company_id.parent_id.name or doc.company_id.name"/>
                                     </strong>
                                     <br/>
                                     <span class="content_text" style="padding: 5px; display: block;">
@@ -216,11 +188,9 @@
                                         <t t-if="doc.company_id.partner_id.city or doc.company_id.partner_id.state_id or doc.company_id.partner_id.zip">
                                             <span t-esc="doc.company_id.partner_id.city or ''"/>
                                             <t t-if="doc.company_id.partner_id.state_id">
-                                                ,
                                                 <span t-esc="doc.company_id.partner_id.state_id.name"/>
                                             </t>
                                             <t t-if="doc.company_id.partner_id.zip">
-                                                -
                                                 <span t-esc="doc.company_id.partner_id.zip"/>
                                             </t>
                                             <br/>
@@ -230,146 +200,171 @@
 
                                     <!-- GST -->
                                     <t t-if="doc.company_id.partner_id.vat">
-                                        <span class="header_text" style="padding: 5px;">GST No:</span>
+                                        <span class="header_text" style="padding: 5px;">
+                                            <b>GST No:</b>
+                                        </span>
                                         <span class="content_text" t-esc="doc.company_id.partner_id.vat"/>
                                         <br/>
                                     </t>
 
                                     <!-- State -->
                                     <t t-if="doc.company_id.partner_id.state_id">
-                                        <span class="header_text" style="padding: 5px;">State Name:</span>
+                                        <span class="header_text" style="padding: 5px;">
+                                            <b>State Name:</b>
+                                        </span>
                                         <span class="content_text" t-esc="doc.company_id.partner_id.state_id.name"/>
                                         <br/>
                                     </t>
                                     <span style="padding: 5px" class="header_text">UDYAM NO:</span>
                                     <span class="content_text">MH-19-0171004</span>
-
                                 </td>
-                                td<!-- Bill To -->
-                                <td style="border:1px solid;width:33.33%;padding:5px;" colspan="2">
-                                    <strong class="content_text">Buyer (Bill To)</strong>
+
+                                <td style="border: 1px solid;width:50%;padding: 5px" colspan="4">
+                                    <strong class="content_text">Buyer (Bill to)</strong>
                                     <br/>
                                     <strong>
-                                        <span t-esc="doc.partner_id.parent_id.name or doc.partner_id.name"
-                                              class="content_text"/>
+                                        <t t-if="doc.partner_id.parent_id">
+                                            <span t-esc="doc.partner_id.parent_id.name" class="content_text"/>
+                                            <br/>
+                                            <span t-esc="doc.partner_id.name" class="content_text"/>
+                                        </t>
+                                        <t t-else="">
+                                            <span t-esc="doc.partner_id.name" class="content_text"/>
+                                        </t>
                                     </strong>
                                     <br/>
                                     <span class="content_text">
-                                        <span t-esc="doc.partner_id.street or ''"/>
-                                        <br/>
-                                        <span t-esc="doc.partner_id.city or ''"/>
-                                        <t t-if="doc.partner_id.state_id">
-                                            ,
-                                            <span t-esc="doc.partner_id.state_id.name"/>
+                                        <t t-if="doc.partner_id.street">
+                                            <span t-esc="doc.partner_id.street"/>
+                                            <br/>
                                         </t>
-                                        <br/>
-                                        <span t-esc="doc.partner_id.zip or ''"/>
+                                        <t t-if="doc.partner_id.street2">
+                                            <span t-esc="doc.partner_id.street2"/>
+                                            <br/>
+                                        </t>
+                                        <span t-esc="doc.partner_id.city"/>
+                                        <span t-esc="doc.partner_id.state_id.name"/>
+                                        <span t-esc="doc.partner_id.zip"/>
                                     </span>
                                     <br/>
                                     <span class="header_text">
-                                        GST:
-                                        <span t-esc="doc.partner_id.vat or 'URP'"/>
+                                        <b>GST No:</b>
                                     </span>
-                                </td>
-
-                                <!-- Dispatch From -->
-                                <td style="border:1px solid;width:33.33%;padding:5px;" colspan="2">
-                                    <strong class="content_text">Dispatch From:</strong>
+                                    <span t-esc="doc.partner_id.vat" class="content_text"/>
                                     <br/>
-
-                                    <!-- Warehouse Name -->
-                                    <strong>
-                                        <span t-esc="doc.invoice_origin and doc.env['stock.picking'].search([('origin','=',doc.invoice_origin)], limit=1).picking_type_id.warehouse_id.name or ''"/>
-                                    </strong>
-
-<!--                                    <t t-set="warehouse"-->
-<!--                                       t-value="doc.invoice_origin and doc.env['stock.picking'].search([('origin','=',doc.invoice_origin)], limit=1).picking_type_id.warehouse_id"/>-->
-
-                                    <br/>
-                                    <span class="content_text">
-                                        <span t-esc="doc.warehouse_name.partner_id.street or ''"/>
-                                        <br/>
-
-                                        <span t-esc="doc.warehouse_name.partner_id.street2 or ''"/>
-                                        <br/>
-
-                                        <span t-esc="doc.warehouse_name.partner_id.city or ''"/>,
-                                        <span t-esc="doc.warehouse_name.partner_id.state_id.name or ''"/>
-                                        -
-                                        <span t-esc="doc.warehouse_name.partner_id.zip or ''"/>
-                                        <br/>
-
-                                        <span t-esc="doc.warehouse_name.partner_id.country_id.name or ''"/>
+                                    <span class="header_text">
+                                        <b>State Name:</b>
                                     </span>
+                                    <span t-esc="doc.partner_id.state_id.name" class="content_text"/>
                                 </td>
+                            </tr>
 
-                                <!-- Ship To -->
-                                <td style="border:1px solid;width:33.33%;padding:5px;" colspan="2">
-                                    <strong class="content_text">Buyer (Ship To)</strong>
+                            <tr>
+                                <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
+                                    <strong style="padding: 5px" class="header_text">Dispatch From:</strong>
                                     <br/>
-                                    <strong>
-                                        <span t-esc="doc.partner_shipping_id.name or doc.partner_id.name"
-                                              class="content_text"/>
-                                    </strong>
+                                </td>
+                                <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
+                                    <strong style="padding: 5px" class="header_text">Other reference:</strong>
                                     <br/>
-                                    <span class="content_text">
-                                        <span t-esc="doc.partner_shipping_id.street or ''"/>
+                                </td>
+                                <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
+                                    <strong style="padding: 5px" class="header_text">Ship To:</strong>
+                                    <br/>
+                                </td>
+                                <td style="border: 1px solid; vertical-align: text-top;" colspan="2">
+                                    <strong style="padding: 5px" class="header_text">Destination:</strong>
+                                    <br/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="border: 1px solid;width:50%;padding: 5px" colspan="4">
+                                    <strong class="content_text">Dispatch WH</strong>
+                                    <br/>
+                                    <t t-if="doc.warehouse_name and doc.warehouse_name.partner_id">
+                                        <strong>
+                                            <span t-esc="doc.warehouse_name.company_id.parent_id.name or ''" class="content_text"/>
+                                        </strong>
                                         <br/>
-                                        <span t-esc="doc.partner_shipping_id.city or ''"/>
-                                        <t t-if="doc.partner_shipping_id.state_id">
-                                            ,
+                                        <span class="content_text">
+                                            <t t-if="doc.warehouse_name.partner_id.street">
+                                                <span t-esc="doc.warehouse_name.partner_id.street"/>
+                                                <br/>
+                                            </t>
+                                            <t t-if="doc.warehouse_name.partner_id.street2">
+                                                <span t-esc="doc.warehouse_name.partner_id.street2"/>
+                                                <br/>
+                                            </t>
+                                            <t t-if="doc.warehouse_name.partner_id.city or doc.warehouse_name.partner_id.state_id or doc.warehouse_name.partner_id.zip">
+                                                <span t-esc="doc.warehouse_name.partner_id.city or ''"/>
+                                                <t t-if="doc.warehouse_name.partner_id.state_id">
+                                                    <span t-esc="doc.warehouse_name.partner_id.state_id.name"/>
+                                                </t>
+                                                <t t-if="doc.warehouse_name.partner_id.zip">
+                                                    <span t-esc="doc.warehouse_name.partner_id.zip"/>
+                                                </t>
+                                                <br/>
+                                            </t>
+                                        </span>
+                                        <t t-if="doc.warehouse_name.partner_id.vat">
+                                            <span class="header_text">
+                                                <b>GST No:</b>
+                                            </span>
+                                            <span t-esc="doc.warehouse_name.partner_id.vat" class="content_text"/>
+                                            <br/>
+                                        </t>
+                                        <t t-if="doc.warehouse_name.partner_id.state_id">
+                                            <span class="header_text">
+                                                <b>State Name:</b>
+                                            </span>
+                                            <span t-esc="doc.warehouse_name.partner_id.state_id.name" class="content_text"/>
+                                        </t>
+                                    </t>
+                                    <t t-elif="doc.warehouse_name">
+                                        <strong>
+                                            <span t-esc="doc.warehouse_name.name" class="content_text"/>
+                                        </strong>
+                                    </t>
+                                </td>
+                                <td style="border: 1px solid;width:50%;padding: 5px" colspan="4">
+                                    <t t-if="doc.partner_shipping_id">
+                                        <strong class="content_text">
+                                            <t t-if="doc.partner_shipping_id.parent_id">
+                                                <span t-esc="doc.partner_shipping_id.parent_id.name"/>
+                                                <br/>
+                                                <span t-esc="doc.partner_shipping_id.name"/>
+                                            </t>
+                                            <t t-else="">
+                                                <span t-esc="doc.partner_shipping_id.name"/>
+                                            </t>
+                                        </strong>
+                                        <br/>
+                                        <span class="content_text">
+                                            <t t-if="doc.partner_shipping_id.street">
+                                                <span t-esc="doc.partner_shipping_id.street"/>
+                                                <br/>
+                                            </t>
+                                            <t t-if="doc.partner_shipping_id.street2">
+                                                <span t-esc="doc.partner_shipping_id.street2"/>
+                                                <br/>
+                                            </t>
+                                            <span t-esc="doc.partner_shipping_id.city"/>
                                             <span t-esc="doc.partner_shipping_id.state_id.name"/>
-                                        </t>
+                                            <span t-esc="doc.partner_shipping_id.zip"/>
+                                        </span>
                                         <br/>
-                                        <span t-esc="doc.partner_shipping_id.zip or ''"/>
-                                    </span>
-                                    <br/>
-                                    <span class="header_text">
-                                        GST:
-                                        <span t-esc="doc.partner_shipping_id.vat or 'URP'"/>
-                                    </span>
+                                        <span class="header_text">
+                                            <b>GST No:</b>
+                                        </span>
+                                        <span t-esc="doc.partner_shipping_id.vat or ''" class="content_text"/>
+                                        <br/>
+                                        <span class="header_text">
+                                            <b>State Name:</b>
+                                        </span>
+                                        <span t-esc="doc.partner_shipping_id.state_id.name or ''" class="content_text"/>
+                                    </t>
                                 </td>
-                                <!--                                <td style="border: 1px solid;width:33.33%;padding: 5px" colspan="3">-->
-                                <!--                                    <strong class="content_text">Buyer (Bill to)</strong>-->
-                                <!--                                    <br/>-->
-                                <!--                                    <strong>-->
-                                <!--                                        <span t-esc="doc.partner_id.parent_id.name or doc.partner_id.name"-->
-                                <!--                                              class="content_text"/>-->
-                                <!--                                    </strong>-->
-                                <!--                                    <br/>-->
-                                <!--                                    <span class="content_text">-->
-                                <!--                                        <span t-esc="doc.partner_id.street or ''"/>,-->
-                                <!--                                        <span t-esc="doc.partner_id.city or ''"/>-->
-                                <!--                                        <br/>-->
-                                <!--                                        <span t-esc="doc.partner_id.state_id.name or ''"/>-->
-                                <!--                                        (<span t-esc="doc.partner_id.zip or ''"/>)-->
-                                <!--                                    </span>-->
-                                <!--                                    <br/>-->
-                                <!--                                    <span class="header_text">GST:-->
-                                <!--                                        <span t-esc="doc.partner_id.vat or 'URP'"/>-->
-                                <!--                                    </span>-->
-                                <!--                                </td>-->
-
-                                <!--                                <td style="border: 1px solid;width:33.33%;padding: 5px" colspan="3">-->
-                                <!--                                    <strong class="content_text">Buyer (Ship to)</strong>-->
-                                <!--                                    <br/>-->
-                                <!--                                    <strong>-->
-                                <!--                                        <span t-esc="doc.partner_shipping_id.name or doc.partner_id.name"-->
-                                <!--                                              class="content_text"/>-->
-                                <!--                                    </strong>-->
-                                <!--                                    <br/>-->
-                                <!--                                    <span class="content_text">-->
-                                <!--                                        <span t-esc="doc.partner_shipping_id.street or ''"/>,-->
-                                <!--                                        <span t-esc="doc.partner_shipping_id.city or ''"/>-->
-                                <!--                                        <br/>-->
-                                <!--                                        <span t-esc="doc.partner_shipping_id.state_id.name or ''"/>-->
-                                <!--                                        (<span t-esc="doc.partner_shipping_id.zip or ''"/>)-->
-                                <!--                                    </span>-->
-                                <!--                                    <br/>-->
-                                <!--                                    <span class="header_text">GST:-->
-                                <!--                                        <span t-esc="doc.partner_shipping_id.vat or 'URP'"/>-->
-                                <!--                                    </span>-->
-                                <!--                                </td>-->
                             </tr>
 
                             <tr>
@@ -405,11 +400,9 @@
 
                             <t t-foreach="doc.invoice_line_ids" t-as="line">
                                 <t t-if="line.display_type != 'line_section' and line.display_type != 'line_note'">
-                                    <t t-set="tax_data"
-                                       t-value="line.tax_ids.compute_all(                                 line.price_unit * (1 - (line.discount or 0.0) / 100.0),                                 currency=doc.currency_id,                                 quantity=line.quantity,                                 product=line.product_id,                                 partner=doc.partner_id                            )"/>
+                                    <t t-set="tax_data" t-value="line.tax_ids.compute_all(                                 line.price_unit * (1 - (line.discount or 0.0) / 100.0),                                 currency=doc.currency_id,                                 quantity=line.quantity,                                 product=line.product_id,                                 partner=doc.partner_id                            )"/>
 
-                                    <t t-set="line_tax_amt"
-                                       t-value="tax_data['total_included'] - tax_data['total_excluded']"/>
+                                    <t t-set="line_tax_amt" t-value="tax_data['total_included'] - tax_data['total_excluded']"/>
                                     <t t-set="line_total_amt" t-value="tax_data['total_included']"/>
 
                                     <tr>
@@ -428,15 +421,12 @@
 
                                         <td style="border: 1px solid" class="text-center">
                                             <center>
-                                                <span t-esc="line.l10n_in_hsn_code or line.product_id.l10n_in_hsn_code or line.product_id.product_tmpl_id.l10n_in_hsn_code or ''"
-                                                      class="content_text"/>
+                                                <span t-esc="line.l10n_in_hsn_code or line.product_id.l10n_in_hsn_code or line.product_id.product_tmpl_id.l10n_in_hsn_code or ''" class="content_text"/>
                                             </center>
                                         </td>
 
-                                        <td style="vertical-align: top; border: 1px solid;" name="td_gst"
-                                            class="text-center align-top nowrap">
-                                            <span t-esc="', '.join(line.tax_ids.mapped('name')) or '--'"
-                                                  class="content_text"/>
+                                        <td style="vertical-align: top; border: 1px solid;" name="td_gst" class="text-center align-top nowrap">
+                                            <span t-esc="', '.join(line.tax_ids.mapped('name')) or '--'" class="content_text"/>
                                         </td>
 
                                         <td style="border: 1px solid" class="text-center">
@@ -446,22 +436,18 @@
                                         </td>
 
                                         <td style="border: 1px solid" class="text-center">
-                                            <span t-esc="line.price_unit" class="content_text"
-                                                  t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/>
+                                            <span t-esc="line.price_unit" class="content_text" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/>
                                         </td>
 
                                         <td style="border: 1px solid" class="text-center">
                                             <center>
-                                                <span t-esc="line_tax_amt"
-                                                      t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"
-                                                      class="content_text"/>
+                                                <span t-esc="line_tax_amt" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}" class="content_text"/>
                                             </center>
                                         </td>
 
                                         <td style="border: 1px solid" class="text-center">
                                             <center>
-                                                <span t-esc="line_total_amt" class="content_text"
-                                                      t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/>
+                                                <span t-esc="line_total_amt" class="content_text" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/>
                                                 <t t-set="total" t-value="total + line_total_amt"/>
                                             </center>
                                         </td>
@@ -469,6 +455,7 @@
                                 </t>
                             </t>
                         </table>
+
                         <t t-if="doc.invoice_line_ids.filtered(lambda l: l.display_type == 'line_section' or l.display_type == 'line_note')">
                             <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                                 <t t-foreach="doc.invoice_line_ids" t-as="line">
@@ -477,11 +464,11 @@
                                             <td style="border: 1px solid; padding: 5px;">
                                                 <t t-if="line.display_type == 'line_section'">
                                                     <strong>
-                                                        <span t-esc="line.product_id.name or '--'"/>
+                                                        <span style="white-space: pre-line;" t-raw="line.product_id.name or '--'"/>
                                                     </strong>
                                                 </t>
                                                 <t t-elif="line.display_type == 'line_note'">
-                                                    <span t-esc="line.name or line.display_name or line.product_id.display_name or '--'"/>
+                                                    <span style="white-space: pre-line;" t-raw="line.name or line.display_name or line.product_id.display_name or '--'"/>
                                                 </t>
                                             </td>
                                         </tr>
@@ -493,22 +480,6 @@
                         <div class="clearfix mb-4 mt-4">
                             <div id="total" class="row">
                                 <div class="col">
-                                    <!--                                    <table style="width:100%">-->
-                                    <!--                                        <thread>-->
-                                    <!--                                            <tr>-->
-                                    <!--                                                <td>-->
-                                    <!--                                                    <strong style="padding:5px">Bank Name:</strong>-->
-                                    <!--                                                    <span t-esc="doc.partner_bank_id.bank_id.name" class="content_text" style="padding: 5px"/><br/>-->
-                                    <!--                                                    <strong style="padding:5px">Account Holder:</strong>-->
-                                    <!--                                                    <span t-esc="doc.partner_bank_id.partner_id.name" class="content_text" style="padding: 5px"/><br/>-->
-                                    <!--                                                    <strong style="padding:5px">Account Number:</strong>-->
-                                    <!--                                                    <span t-esc="doc.partner_bank_id.acc_number" class="content_text" style="padding: 5px"/><br/>-->
-                                    <!--                                                    <strong style="padding:5px">Branch:</strong>-->
-                                    <!--                                                    <span t-esc="doc.partner_bank_id.bank_id.street" class="content_text" style="padding: 5px"/><br/>-->
-                                    <!--                                                    <strong style="padding:5px">IFSC Code:</strong>-->
-                                    <!--                                                    <span t-esc="doc.partner_bank_id.bank_id.bic" class="content_text" style="padding: 5px"/>-->
-                                    <!--                                                </td>-->
-                                    <!--                                                <td>-->
                                     <table style="page-break-inside: avoid; width:38%; float:right;">
 
                                         <!-- Tax totals -->
@@ -516,12 +487,6 @@
                                         <t t-set="currency" t-value="doc.currency_id"/>
                                         <t t-call="account.document_tax_totals"/>
                                     </table>
-
-
-                                    <!--                                                </td>-->
-                                    <!--                                            </tr>-->
-                                    <!--                                        </thread>-->
-                                    <!--                                    </table>-->
 
                                 </div>
                             </div>
@@ -535,12 +500,10 @@
                                     <span style="padding: 5px" class="header_text">Amount Chargeable (in words):</span>
 
                                     <t t-if="doc.currency_id.name == 'INR'">
-                                        <strong class="content_text" style="text-transform: capitalize;"
-                                                t-esc="doc.convert_num_to_text(doc.amount_total_signed)"/>
+                                        <strong class="content_text" style="text-transform: capitalize;" t-esc="doc.convert_num_to_text(doc.amount_total_signed)"/>
                                     </t>
                                     <t t-else="">
-                                        <strong class="content_text"
-                                                t-esc="doc.currency_id.amount_to_text(doc.amount_total).replace(',', '')"/>
+                                        <strong class="content_text" t-esc="doc.currency_id.amount_to_text(doc.amount_total).replace(',', '')"/>
                                         <strong>only</strong>
                                     </t>
                                 </td>
@@ -550,8 +513,7 @@
                             <tr>
                                 <th style="border: 1px solid;text-align:center;font-weight:bold;" rowspan="2">Sr. No
                                 </th>
-                                <th style="border: 1px solid;text-align:center;font-weight:bold;" rowspan="2"
-                                    colspan="3">HSN/SAC
+                                <th style="border: 1px solid;text-align:center;font-weight:bold;" rowspan="2" colspan="3">HSN/SAC
                                 </th>
                                 <th style="border: 1px solid;text-align:center;font-weight:bold;" rowspan="2">Taxable
                                     Value
@@ -572,14 +534,14 @@
                             </tr>
 
                             <tr>
-                                <th style="border: 1px solid">Rate</th>
-                                <th style="border: 1px solid">Amount</th>
+                                <th style="border: 1px solid;text-align:center;font-weight:bold;">Rate</th>
+                                <th style="border: 1px solid;text-align:center;font-weight:bold;">Amount</th>
 
-                                <th style="border: 1px solid">Rate</th>
-                                <th style="border: 1px solid">Amount</th>
+                                <th style="border: 1px solid;text-align:center;font-weight:bold;">Rate</th>
+                                <th style="border: 1px solid;text-align:center;font-weight:bold;">Amount</th>
 
-                                <th style="border: 1px solid">Rate</th>
-                                <th style="border: 1px solid">Amount</th>
+                                <th style="border: 1px solid;text-align:center;font-weight:bold;">Rate</th>
+                                <th style="border: 1px solid;text-align:center;font-weight:bold;">Amount</th>
                             </tr>
 
                             <!-- FETCH SUMMARY -->
@@ -606,8 +568,7 @@
 
                                         <!-- Taxable -->
                                         <td style="border: 1px solid" class="center_text">
-                                            <span t-esc="item.get('amount_untaxed', 0.0)"
-                                                  t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                            <span t-esc="item.get('amount_untaxed', 0.0)" t-options='{"widget": "float", "precision": 2}'/>
                                         </td>
 
                                         <!-- CGST Rate -->
@@ -617,8 +578,7 @@
 
                                         <!-- CGST Amount -->
                                         <td style="border: 1px solid" class="center_text">
-                                            <span t-esc="item.get('tax_amount_cgst', 0.0)"
-                                                  t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                            <span t-esc="item.get('tax_amount_cgst', 0.0)" t-options='{"widget": "float", "precision": 2}'/>
                                         </td>
 
                                         <!-- SGST Rate -->
@@ -628,8 +588,7 @@
 
                                         <!-- SGST Amount -->
                                         <td style="border: 1px solid" class="center_text">
-                                            <span t-esc="item.get('tax_amount_sgst', 0.0)"
-                                                  t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                            <span t-esc="item.get('tax_amount_sgst', 0.0)" t-options='{"widget": "float", "precision": 2}'/>
                                         </td>
 
                                         <!-- IGST Rate -->
@@ -639,14 +598,12 @@
 
                                         <!-- IGST Amount -->
                                         <td style="border: 1px solid" class="center_text">
-                                            <span t-esc="item.get('tax_amount_igst', 0.0)"
-                                                  t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                            <span t-esc="item.get('tax_amount_igst', 0.0)" t-options='{"widget": "float", "precision": 2}'/>
                                         </td>
 
                                         <!-- TOTAL TAX -->
                                         <td style="border: 1px solid" class="center_text">
-                                            <span t-esc="                         item.get('tax_amount_cgst', 0.0)                         + item.get('tax_amount_sgst', 0.0)                         + item.get('tax_amount_igst', 0.0)                         + item.get('tax_amount_cess', 0.0)                     "
-                                                  t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                            <span t-esc="                         item.get('tax_amount_cgst', 0.0)                         + item.get('tax_amount_sgst', 0.0)                         + item.get('tax_amount_igst', 0.0)                         + item.get('tax_amount_cess', 0.0)                     " t-options='{"widget": "float", "precision": 2}'/>
                                         </td>
                                     </tr>
 
@@ -660,38 +617,33 @@
 
                                     <!-- Taxable -->
                                     <td style="border: 1px solid" class="center_text">
-                                        <span t-esc="sum([i.get('amount_untaxed', 0.0) for i in hsn_summary.get('items')])"
-                                              t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                        <span t-esc="sum([i.get('amount_untaxed', 0.0) for i in hsn_summary.get('items')])" t-options='{"widget": "float", "precision": 2}'/>
                                     </td>
 
                                     <td style="border: 1px solid"/>
 
                                     <!-- CGST -->
                                     <td style="border: 1px solid" class="center_text">
-                                        <span t-esc="sum([i.get('tax_amount_cgst', 0.0) for i in hsn_summary.get('items')])"
-                                              t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                        <span t-esc="sum([i.get('tax_amount_cgst', 0.0) for i in hsn_summary.get('items')])" t-options='{"widget": "float", "precision": 2}'/>
                                     </td>
 
                                     <td style="border: 1px solid"/>
 
                                     <!-- SGST -->
                                     <td style="border: 1px solid" class="center_text">
-                                        <span t-esc="sum([i.get('tax_amount_sgst', 0.0) for i in hsn_summary.get('items')])"
-                                              t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                        <span t-esc="sum([i.get('tax_amount_sgst', 0.0) for i in hsn_summary.get('items')])" t-options='{"widget": "float", "precision": 2}'/>
                                     </td>
 
                                     <td style="border: 1px solid"/>
 
                                     <!-- IGST -->
                                     <td style="border: 1px solid" class="center_text">
-                                        <span t-esc="sum([i.get('tax_amount_igst', 0.0) for i in hsn_summary.get('items')])"
-                                              t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                        <span t-esc="sum([i.get('tax_amount_igst', 0.0) for i in hsn_summary.get('items')])" t-options='{"widget": "float", "precision": 2}'/>
                                     </td>
 
                                     <!-- TOTAL TAX -->
                                     <td style="border: 1px solid" class="center_text">
-                                        <span t-esc="sum([                     i.get('tax_amount_cgst', 0.0)                     + i.get('tax_amount_sgst', 0.0)                     + i.get('tax_amount_igst', 0.0)                     + i.get('tax_amount_cess', 0.0)                     for i in hsn_summary.get('items')                 ])"
-                                              t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                        <span t-esc="sum([                     i.get('tax_amount_cgst', 0.0)                     + i.get('tax_amount_sgst', 0.0)                     + i.get('tax_amount_igst', 0.0)                     + i.get('tax_amount_cess', 0.0)                     for i in hsn_summary.get('items')                 ])" t-options='{"widget": "float", "precision": 2}'/>
                                     </td>
                                 </tr>
 
@@ -702,8 +654,7 @@
                                 <td colspan="12" style="border-left: 1px solid;border-right: 1px solid;">
                                     <strong style="padding: 5px">Tax Amount (In Words):</strong>
 
-                                    <strong style="text-transform: capitalize;"
-                                            t-esc="doc.convert_num_to_text(doc.amount_tax)"/>
+                                    <strong style="text-transform: capitalize;" t-esc="doc.convert_num_to_text(doc.amount_tax)"/>
 
                                     <br/>
 
@@ -744,6 +695,7 @@
                                     <br/>
                                     Authorised Signatory
                                 </td>
+
                             </tr>
 
                         </table>
