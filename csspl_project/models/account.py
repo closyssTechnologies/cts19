@@ -656,3 +656,22 @@ class SequenceMixin(models.AbstractModel):
             #         sequence_field=record._fields[record._sequence_field]._description_string(self.env),
             #         model=self.env['ir.model']._get(record._name).display_name,
             #     ))
+
+class L10n_InWithholdWizard(models.TransientModel):
+    _inherit = 'l10n_in.withhold.wizard'
+
+    def action_create_and_post_withhold(self):
+        self.ensure_one()
+        if self.company_id != self.env.company:
+            raise UserError(_(
+                "%(user)s, the selected company is '%(selected_company)s' and the Invoice/Bill company is '%(invoice_company)s'. Kindly rectify and process."
+            ) % {
+                                'user': self.env.user.name,
+                                'selected_company': self.env.company.display_name,
+                                'invoice_company': self.company_id.display_name,
+                            })
+
+        return super().action_create_and_post_withhold()
+
+
+
